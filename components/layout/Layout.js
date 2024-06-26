@@ -28,7 +28,7 @@ const Layout = ({ children }) => {
         openClass={openClass}
         addClass="header-home7"
       />
-      <Sidebar openClass={openClass} />
+      {/* <Sidebar openClass={openClass} /> */}
       <main className="main">{children}</main>
       <Footer />
     </>
