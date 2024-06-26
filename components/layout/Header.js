@@ -9,7 +9,7 @@ const Header = () => {
             href="/"
             className="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-decoration-none"
           >
-            <h3>test</h3>
+            <h3>robot</h3>
           </Link>
         </header>
       </div>

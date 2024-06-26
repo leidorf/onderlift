@@ -623,6 +623,11 @@ react-transition-group@^4.4.5:
     loose-envify "^1.4.0"
     prop-types "^15.6.2"
 
+react-zoom-pan-pinch@^3.5.1:
+  version "3.5.1"
+  resolved "https://registry.yarnpkg.com/react-zoom-pan-pinch/-/react-zoom-pan-pinch-3.5.1.tgz#7f010c620c4714b05739cf3bf8b7a61426c54b77"
+  integrity sha512-Ehak8lZUwM4SH+19sQzVa7S95QdRTXjIdJRiVzlpYlCFjXCw1k+Eh/RdeytaiarqDEZdEfSoV7FSOqtsRTC9cg==
+
 react@^18.3.1:
   version "18.3.1"
   resolved "https://registry.yarnpkg.com/react/-/react-18.3.1.tgz#49ab892009c53933625bd16b2533fc754cab2891"

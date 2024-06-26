@@ -3,6 +3,7 @@ import axios from "axios";
 import Layout from "@/components/layout/Layout";
 import PageHead from "@/components/layout/PageHead";
 import { useState } from "react";
+import Link from "next/link";
 
 export default function UpdateMap({ robot }) {
   const router = useRouter();
@@ -43,10 +44,17 @@ export default function UpdateMap({ robot }) {
       <Layout>
         <PageHead headTitle={`Haritayı Güncelle - Robot ${robot.id}`} />
         <div className="container">
-          <h5 className="text-primary">Haritayı Güncelle - <strong>Robot {robot.id}</strong></h5><br/>
+          <h5 className="text-danger">
+            Haritayı Güncelle - <strong>Robot {robot.id}</strong>
+          </h5>
+          <br />
           <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label htmlFor="photo">Yeni Harita Resmi Seçin:</label>
+              <label htmlFor="photo">
+                Robot {robot.id} İçin Yeni Harita Resmi Seçin:
+              </label>
+              <br />
+              <br />
               <input
                 type="file"
                 className="form-control"
@@ -56,10 +64,20 @@ export default function UpdateMap({ robot }) {
                 accept="image/png, image/jpeg, image/jpg"
                 required
               />
-            </div><br/>
-            <button type="submit" className="btn-sm btn-success">
-              Haritayı Güncelle
-            </button>
+            </div>
+            <br />
+            <div className="row row-cols-auto">
+              <div className="col">
+                <Link href={"/"}>
+                  <button className="btn btn-primary">Ana Sayfa</button>
+                </Link>
+              </div>
+              <div className="col">
+                <button type="submit" className="btn btn-warning">
+                  Haritayı Güncelle
+                </button>
+              </div>
+            </div>
           </form>
         </div>
       </Layout>

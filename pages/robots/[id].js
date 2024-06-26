@@ -3,9 +3,35 @@ import axios from "axios";
 import Layout from "@/components/layout/Layout";
 import PageHead from "@/components/layout/PageHead";
 import Link from "next/link";
+import { useState } from "react";
 
 export default function Robot({ robot }) {
   const router = useRouter();
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  const handleDelete = async () => {
+    const confirmDelete = confirm(`Robot ${robot.id} silinsin mi?`);
+    if (confirmDelete) {
+      try {
+        await axios.delete(`/api/delete?id=${robot.id}`);
+        alert("Robot başarıyla silindi!");
+        router.push("/"); // Anasayfaya yönlendir
+      } catch (error) {
+        console.error("Robot silme hatası:", error);
+        alert("Robot silme sırasında bir hata oluştu.");
+      }
+    }
+  };
+
+  const handleMouseMove = (event) => {
+    const img = event.currentTarget;
+    const rect = img.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * img.naturalWidth;
+    const y = ((event.clientY - rect.top) / rect.height) * img.naturalHeight;
+    const centerX = img.naturalWidth / 2;
+    const centerY = img.naturalHeight / 2;
+    setMousePosition({ x: x - centerX, y: y - centerY });
+  };
 
   if (router.isFallback) {
     return <div>Loading...</div>;
@@ -15,69 +41,78 @@ export default function Robot({ robot }) {
     <>
       <Layout>
         <PageHead headTitle={`Robot ${robot.id}`} />
-        <div className="container">
+        <div className="container h6">
           <div>
             <h4 className="text-primary">Robot ID: {robot.id}</h4>
             <br />
-            <table className="table table-striped">
-              <thead>
-                <tr>
-                  <th scope="col">X Pozisyonu</th>
-                  <th scope="col">Y Pozisyonu</th>
-                  <th scope="col">Z Pozisyonu</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <th scope="row">{robot.x_position}</th>
-                  <th scope="row">{robot.y_position}</th>
-                  <th scope="row">{robot.z_position}</th>
-                </tr>
-              </tbody>
+            <div className="">
+              <div className="row">
+                <div className="col-2 bg-light fw-bold">X Pozisyonu</div>
+                <div className="col-2 bg-light fw-bold">Y Pozisyonu</div>
+                <div className="col-2 bg-light fw-bold">Z Pozisyonu</div>
+                <div className="w-100"></div>
+                <div className="col-2">{robot.x_position}</div>
+                <div className="col-2">{robot.y_position}</div>
+                <div className="col-2">{robot.z_position}</div>
+              </div>
               <br />
-              <thead>
-                <tr>
-                  <th scope="col">Yaw</th>
-                  <th scope="col">Roll</th>
-                  <th scope="col">Pitch</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <th scope="col">{robot.yaw}</th>
-                  <th scope="col">{robot.roll}</th>
-                  <th scope="col">{robot.pitch}</th>
-                </tr>
-              </tbody>
-            </table>
+              <div className="row">
+                <div className="col-2 bg-light fw-bold">Yaw</div>
+                <div className="col-2 bg-light fw-bold">Roll</div>
+                <div className="col-2 bg-light fw-bold">Pitch</div>
+                <div className="w-100"></div>
+                <div className="col-2">{robot.yaw}</div>
+                <div className="col-2">{robot.roll}</div>
+                <div className="col-2">{robot.pitch}</div>
+              </div>
+            </div>
+            <br />
             <p>Harita:</p>
-            {robot.photo_path && (
-              <img
-                src={robot.photo_path}
-                alt="Robot Harita"
-                style={{ maxWidth: "4000px", maxHeight: "4000px" }}
-              />
+            {robot.photo && (
+              <div style={{ position: "relative" }}>
+                <img
+                  src={`data:image/jpeg;base64,${robot.photo}`}
+                  alt="Robot Harita"
+                  style={{ maxWidth: "100%", maxHeight: "100%" }}
+                  onMouseMove={handleMouseMove}
+                />
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    backgroundColor: "rgba(255, 255, 255, 0.7)",
+                    padding: "5px",
+                    borderRadius: "5px",
+                    zIndex: 10,
+                  }}
+                >
+                  <p style={{ margin: 0 }}>
+                    Fare Konumu: X: {mousePosition.x.toFixed(2)}, Y: {mousePosition.y.toFixed(2)}
+                  </p>
+                </div>
+              </div>
             )}
             <p>Robot Kayıt Tarihi: {robot.creation}</p>
           </div>
           <br />
           <div className="row">
-            <div className="col-2">
-              <h6>
-                <Link href="/" className="nav-link text-primary">
-                  Ana Sayfa
-                </Link>
-              </h6>
+            <div className="col">
+              <Link href={`/`}>
+                <button className="btn btn-primary">Ana Sayfa</button>
+              </Link>
             </div>
-            <div className="col-2">
-              <h6>
-                <Link
-                  href={`/update-map?id=${robot.id}`}
-                  className="nav-link text-warning mb-3"
-                >
-                  Haritayı Güncelle
+            <div className="col-3 row">
+              <div className="col-sm-6">
+                <Link href={`/update-map?id=${robot.id}`}>
+                  <button className="btn btn-warning">Haritayı Güncelle</button>
                 </Link>
-              </h6>
+              </div>
+              <div className="col-sm-6">
+                <button className="btn btn-danger" onClick={handleDelete}>
+                  Robotu Sil
+                </button>
+              </div>
             </div>
           </div>
         </div>

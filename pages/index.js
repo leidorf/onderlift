@@ -11,15 +11,10 @@ export default function HomePage({ robots }) {
         <PageHead headTitle="onderlift"></PageHead>
         <div className="container">
           <div className="row">
-            <div className="col-2">
-              <h4>robots</h4>
-            </div>
             <div className="col-4">
-              <h4>
-                <Link href="./add-robot" className="text-success">
-                  Robot Ekle
-                </Link>
-              </h4>
+              <Link href="./add-robot" className="text-success">
+                <button className="btn btn-success">Robot Ekle</button>
+              </Link>
             </div>
           </div>
           <div>
@@ -33,9 +28,9 @@ export default function HomePage({ robots }) {
                         Robot ID: {robot.id}
                       </Link>
                     </h5>
-                    Oluşturulma Tarihi: {robot.creation}
+                    {robot.photo && <span>Harita Kayıtlı</span>}
                     <br />
-                    {robot.photo_path && <span>Harita Kayıtlı</span>}
+                    Oluşturulma Tarihi: {robot.creation}
                   </div>
                   <br />
                 </li>

@@ -45,6 +45,7 @@ export default function AddRobot() {
         },
       });
       alert("Robot başarıyla eklendi!");
+      router.push(`/`);
     } catch (error) {
       console.error("Error adding robot:", error);
       alert("Robot eklenirken bir hata oluştu.");
@@ -59,46 +60,67 @@ export default function AddRobot() {
           <form onSubmit={handleSubmit}>
             <div>
               <label>X Pozisyonu</label>
+              <br />
               <input type="text" name="x_position" onChange={handleChange} />
             </div>
             <br />
             <div>
               <label>Y Pozisyonu</label>
+              <br />
               <input type="text" name="y_position" onChange={handleChange} />
             </div>
             <br />
             <div>
               <label>Z Pozisyonu</label>
+              <br />
               <input type="text" name="z_position" onChange={handleChange} />
             </div>
             <br />
             <div>
               <label>Yaw</label>
+              <br />
               <input type="text" name="yaw" onChange={handleChange} />
             </div>
             <br />
             <div>
               <label>Roll</label>
+              <br />
               <input type="text" name="roll" onChange={handleChange} />
             </div>
             <br />
             <div>
               <label>Pitch</label>
+              <br />
               <input type="text" name="pitch" onChange={handleChange} />
             </div>
             <br />
             <div>
               <label>Fotoğraf</label>
-              <input type="file" name="photo" onChange={handleFileChange} />
+              <br />
+              <br />
+              <input
+                type="file"
+                name="photo"
+                onChange={handleFileChange}
+                accept="image/png, image/jpeg, image/jpg"
+              />
             </div>
             <br />
-            <button type="submit">Robot Ekle</button>
-          </form><br/>
-          <h5>
-            <Link href=".." className="text-primary">
-              Geri Dön
-            </Link>
-          </h5>
+            <br />
+            <div className="row row-cols-auto">
+              <div className="col">
+                <Link href="/" className="text-primary">
+                  <button className="btn btn-primary">Ana Sayfa</button>
+                </Link>
+              </div>
+              <div className="col">
+                <button type="submit" className="btn btn-success">
+                  Robot Ekle
+                </button>
+              </div>
+            </div>
+          </form>
+          <br />
         </div>
       </Layout>
     </>
