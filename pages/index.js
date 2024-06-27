@@ -28,8 +28,11 @@ export default function HomePage({ robots }) {
                         Robot ID: {robot.id}
                       </Link>
                     </h5>
-                    {robot.photo && <span>Harita Kayıtlı</span>}
-                    <br />
+                    {robot.photo && (
+                      <span>
+                        Harita Kayıtlı <br />
+                      </span>
+                    )}
                     Oluşturulma Tarihi: {robot.creation}
                   </div>
                   <br />

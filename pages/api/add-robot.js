@@ -1,6 +1,6 @@
 import formidable from 'formidable-serverless';
 import fs from 'fs/promises';
-import pool from '../../server/database';
+import pool from '../../server/db';
 
 export const config = {
   api: {

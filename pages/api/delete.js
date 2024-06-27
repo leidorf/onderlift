@@ -1,4 +1,4 @@
-import pool from '../../server/database';
+import pool from '../../server/db';
 import fs from 'fs/promises';
 
 export default async function handler(req, res) {

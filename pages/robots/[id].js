@@ -3,11 +3,45 @@ import axios from "axios";
 import Layout from "@/components/layout/Layout";
 import PageHead from "@/components/layout/PageHead";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
-export default function Robot({ robot }) {
+export default function Robot({ robot, paths }) {
   const router = useRouter();
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [xPosition, setXPosition] = useState("");
+  const [yPosition, setYPosition] = useState("");
+  const [zPosition, setZPosition] = useState("");
+  const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
+  const [clickedPosition, setClickedPosition] = useState(null);
+  const imageRef = useRef(null);
+  const nodeColors = [
+    "red",
+    "blue",
+    "green",
+    "orange",
+    "purple",
+    "yellow",
+    "cyan",
+    "magenta",
+  ];
+  const handleAddPath = async (e) => {
+    e.preventDefault();
+
+    try {
+      await axios.post("/api/add-path", {
+        robot_id: robot.id,
+        x_position: xPosition,
+        y_position: yPosition,
+        z_position: zPosition,
+      });
+
+      alert("Yol başarıyla eklendi!");
+      router.reload(); // Sayfayı yenileyerek yeni yolları göster
+    } catch (error) {
+      console.error("Yol ekleme hatası:", error);
+      alert("Yol ekleme sırasında bir hata oluştu.");
+    }
+  };
 
   const handleDelete = async () => {
     const confirmDelete = confirm(`Robot ${robot.id} silinsin mi?`);
@@ -32,6 +66,45 @@ export default function Robot({ robot }) {
     const centerY = img.naturalHeight / 2;
     setMousePosition({ x: x - centerX, y: y - centerY });
   };
+
+  const handleImageLoad = () => {
+    if (imageRef.current) {
+      setImageSize({
+        width: imageRef.current.offsetWidth,
+        height: imageRef.current.offsetHeight,
+      });
+    }
+  };
+  const handleImageClick = async (event) => {
+    const img = event.currentTarget;
+    const rect = img.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * img.naturalWidth;
+    const y = ((event.clientY - rect.top) / rect.height) * img.naturalHeight;
+
+    try {
+      await axios.post("/api/add-path", {
+        robot_id: robot.id,
+        x_position: x,
+        y_position: y,
+        z_position: 0, // Örnek olarak z_position 0 olarak ayarlandı, isteğe bağlı değişiklik yapılabilir
+      });
+
+      alert("Yol başarıyla eklendi!");
+      router.reload(); // Sayfayı yenileyerek yeni yolları göster
+    } catch (error) {
+      console.error("Yol ekleme hatası:", error);
+      alert("Yol ekleme sırasında bir hata oluştu.");
+    }
+  };
+
+  useEffect(() => {
+    if (imageRef.current) {
+      setImageSize({
+        width: imageRef.current.offsetWidth,
+        height: imageRef.current.offsetHeight,
+      });
+    }
+  }, [imageRef.current]);
 
   if (router.isFallback) {
     return <div>Loading...</div>;
@@ -67,32 +140,107 @@ export default function Robot({ robot }) {
               </div>
             </div>
             <br />
-            <p>Harita:</p>
-            {robot.photo && (
-              <div style={{ position: "relative" }}>
-                <img
-                  src={`data:image/jpeg;base64,${robot.photo}`}
-                  alt="Robot Harita"
-                  style={{ maxWidth: "100%", maxHeight: "100%" }}
-                  onMouseMove={handleMouseMove}
-                />
-                <div
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    backgroundColor: "rgba(255, 255, 255, 0.7)",
-                    padding: "5px",
-                    borderRadius: "5px",
-                    zIndex: 10,
-                  }}
-                >
-                  <p style={{ margin: 0 }}>
-                    Fare Konumu: X: {mousePosition.x.toFixed(2)}, Y: {mousePosition.y.toFixed(2)}
-                  </p>
-                </div>
+            <div className="row row-col-auto">
+              <div className="col">
+                <p>Harita:</p>
+                {robot.photo && (
+                  <div style={{ position: "relative" }}>
+                    <img
+                      src={`data:image/jpeg;base64,${robot.photo}`}
+                      alt="Robot Harita"
+                      style={{ maxWidth: "100%", maxHeight: "100%" }}
+                      onClick={handleImageClick}
+                      onMouseMove={handleMouseMove}
+                      onLoad={handleImageLoad}
+                      ref={imageRef}
+                    />
+                    <div className="mouse-info">
+                      <p>
+                        Fare Konumu: X: {mousePosition.x.toFixed(2)}, Y:{" "}
+                        {mousePosition.y.toFixed(2)}
+                      </p>
+                    </div>
+                    {paths.map((path, index) => {
+                      const color = nodeColors[index % nodeColors.length];
+                      const xPos =
+                        imageSize.width / 2 + parseFloat(path.x_position);
+                      const yPos =
+                        imageSize.height / 2 - parseFloat(path.y_position);
+                      return (
+                        <div
+                          key={path.node_id}
+                          style={{
+                            position: "absolute",
+                            top: `${yPos}px`,
+                            left: `${xPos}px`,
+                            width: "7.5px",
+                            height: "7.5px",
+                            backgroundColor: color,
+                            borderRadius: "50%",
+                            transform: "translate(-50%, -50%)",
+                          }}
+                          title={`Nokta ${index + 1}: X: ${
+                            path.x_position
+                          } - Y: ${path.y_position}`}
+                        />
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-            )}
+              <div className="col-3">
+                <h5>Yeni Yol Ekle</h5>
+                <form onSubmit={handleAddPath}>
+                  <div className="form-group">
+                    <label htmlFor="xPosition">X Pozisyonu:</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="xPosition"
+                      value={xPosition}
+                      onChange={(e) => setXPosition(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="yPosition">Y Pozisyonu:</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="yPosition"
+                      value={yPosition}
+                      onChange={(e) => setYPosition(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="zPosition">Z Pozisyonu:</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="zPosition"
+                      value={zPosition}
+                      onChange={(e) => setZPosition(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <button type="submit" className="btn btn-primary">
+                    Yol Ekle
+                  </button>
+                </form>
+                <h5>Robotun Yolları:</h5>
+                <ul>
+                  {paths.map((path, index) => (
+                    <li key={path.node_id}>
+                      <p>
+                        Yol: {index + 1}, X: {path.x_position}, Y:{" "}
+                        {path.y_position}, Z: {path.z_position}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
             <p>Robot Kayıt Tarihi: {robot.creation}</p>
           </div>
           <br />
@@ -129,19 +277,22 @@ export async function getStaticPaths() {
     params: { id: robot.id.toString() },
   }));
 
-  return { paths, fallback: true };
+  return {
+    paths,
+    fallback: true,
+  };
 }
 
 export async function getStaticProps({ params }) {
-  const response = await axios.get(
-    `http://localhost:3000/api/robots/${params.id}`
-  ); // API endpoint'i değiştirdiğinizden emin olun
-  const robot = response.data;
+  const [robotRes, pathsRes] = await Promise.all([
+    axios.get(`http://localhost:3000/api/robots/${params.id}`), // Robot detaylarını al
+    axios.get(`http://localhost:3000/api/paths?robot_id=${params.id}`), // Robotun yollarını al
+  ]);
 
   return {
     props: {
-      robot,
+      robot: robotRes.data,
+      paths: pathsRes.data,
     },
-    revalidate: 10, // 10 saniye sonra sayfa yeniden oluşturulabilir
   };
 }

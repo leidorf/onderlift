@@ -1,10 +1,13 @@
 import { useState } from "react";
 import axios from "axios";
+import { useRouter } from "next/router";
 import Layout from "@/components/layout/Layout";
 import PageHead from "@/components/layout/PageHead";
 import Link from "next/link";
 
 export default function AddRobot() {
+  const router = useRouter();
+
   const [robotData, setRobotData] = useState({
     x_position: "",
     y_position: "",
@@ -35,11 +38,13 @@ export default function AddRobot() {
 
     const formData = new FormData();
     for (const key in robotData) {
-      formData.append(key, robotData[key]);
+      if (robotData[key] !== null) { // FormData'ya boş alan eklememek için kontrol
+        formData.append(key, robotData[key]);
+      }
     }
 
     try {
-      await axios.post("/api/upload", formData, {
+      await axios.post("/api/add-robot", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -55,7 +60,7 @@ export default function AddRobot() {
   return (
     <>
       <Layout>
-        <PageHead headTitle="Add Robot"></PageHead>
+        <PageHead headTitle="Add Robot" />
         <div className="container">
           <form onSubmit={handleSubmit}>
             <div>
@@ -97,7 +102,6 @@ export default function AddRobot() {
             <div>
               <label>Fotoğraf</label>
               <br />
-              <br />
               <input
                 type="file"
                 name="photo"
@@ -110,7 +114,9 @@ export default function AddRobot() {
             <div className="row row-cols-auto">
               <div className="col">
                 <Link href="/" className="text-primary">
-                  <button className="btn btn-primary">Ana Sayfa</button>
+                    <button type="button" className="btn btn-primary">
+                      Ana Sayfa
+                    </button>
                 </Link>
               </div>
               <div className="col">
