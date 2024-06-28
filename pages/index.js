@@ -40,11 +40,6 @@ export default function HomePage({ robots }) {
               ))}
             </ul>
           </div>
-          <h5>
-            <Link href="/dashboard" className="text-primary">
-              dashboard
-            </Link>
-          </h5>
         </div>
       </Layout>
     </>

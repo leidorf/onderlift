@@ -48,37 +48,39 @@ export default function UpdateMap({ robot }) {
             Haritayı Güncelle - <strong>Robot {robot.id}</strong>
           </h5>
           <br />
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label htmlFor="photo">
-                Robot {robot.id} İçin Yeni Harita Resmi Seçin:
-              </label>
-              <br />
-              <br />
-              <input
-                type="file"
-                className="form-control"
-                id="photo"
-                name="photo"
-                onChange={handleFileChange}
-                accept="image/png, image/jpeg, image/jpg"
-                required
-              />
-            </div>
-            <br />
-            <div className="row row-cols-auto">
-              <div className="col">
-                <Link href={"/"}>
-                  <button className="btn btn-primary">Ana Sayfa</button>
-                </Link>
+          <div className="row row-cols-auto">
+            <form onSubmit={handleSubmit}>
+              <div className="form-group">
+                <label htmlFor="photo">
+                  Robot {robot.id} İçin Yeni Harita Resmi Seçin:
+                </label>
+                <br />
+                <br />
+                <input
+                  type="file"
+                  className="form-control"
+                  id="photo"
+                  name="photo"
+                  onChange={handleFileChange}
+                  accept="image/png, image/jpeg, image/jpg"
+                  required
+                />
               </div>
-              <div className="col">
-                <button type="submit" className="btn btn-warning">
-                  Haritayı Güncelle
-                </button>
+              <br />
+              <div className="row row-cols-auto">
+                <div className="col">
+                  <Link href={"/"}>
+                    <button className="btn btn-primary">Ana Sayfa</button>
+                  </Link>
+                </div>
+                <div className="col">
+                  <button type="submit" className="btn btn-warning">
+                    Haritayı Güncelle
+                  </button>
+                </div>
               </div>
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
       </Layout>
     </>

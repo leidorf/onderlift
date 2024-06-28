@@ -38,7 +38,8 @@ export default function AddRobot() {
 
     const formData = new FormData();
     for (const key in robotData) {
-      if (robotData[key] !== null) { // FormData'ya boş alan eklememek için kontrol
+      if (robotData[key] !== null) {
+        // FormData'ya boş alan eklememek için kontrol
         formData.append(key, robotData[key]);
       }
     }
@@ -62,70 +63,109 @@ export default function AddRobot() {
       <Layout>
         <PageHead headTitle="Add Robot" />
         <div className="container">
-          <form onSubmit={handleSubmit}>
-            <div>
-              <label>X Pozisyonu</label>
+          <div className="row row-cols-auto">
+            <form onSubmit={handleSubmit}>
+              <div className="form-floating">
+                <input
+                  type="text"
+                  className="form-control"
+                  id="floatingInput"
+                  name="x_position"
+                  onChange={handleChange}
+                  placeholder="0"
+                />
+                <label for="floatingInput">X Pozisyonu</label>
+              </div>
               <br />
-              <input type="text" name="x_position" onChange={handleChange} />
-            </div>
-            <br />
-            <div>
-              <label>Y Pozisyonu</label>
+              <div className="form-floating">
+                <input
+                  type="text"
+                  className="form-control"
+                  id="floatingInput"
+                  name="y_position"
+                  onChange={handleChange}
+                  placeholder="0"
+                />
+                <label for="floatingInput">Y Pozisyonu</label>
+              </div>
               <br />
-              <input type="text" name="y_position" onChange={handleChange} />
-            </div>
-            <br />
-            <div>
-              <label>Z Pozisyonu</label>
+              <div className="form-floating">
+                <input
+                  type="text"
+                  className="form-control"
+                  id="floatingInput"
+                  name="z_position"
+                  onChange={handleChange}
+                  placeholder="0"
+                />
+                <label for="floatingInput">Z Pozisyonu</label>
+              </div>
               <br />
-              <input type="text" name="z_position" onChange={handleChange} />
-            </div>
-            <br />
-            <div>
-              <label>Yaw</label>
+              <div className="form-floating">
+                <input
+                  type="text"
+                  className="form-control"
+                  id="floatingInput"
+                  name="yaw"
+                  onChange={handleChange}
+                  placeholder="0"
+                />
+                <label for="floatingInput">Yaw</label>
+              </div>
               <br />
-              <input type="text" name="yaw" onChange={handleChange} />
-            </div>
-            <br />
-            <div>
-              <label>Roll</label>
+              <div className="form-floating">
+                <input
+                  type="text"
+                  className="form-control"
+                  id="floatingInput"
+                  name="roll"
+                  onChange={handleChange}
+                  placeholder="0"
+                />
+                <label for="floatingInput">Roll</label>
+              </div>
               <br />
-              <input type="text" name="roll" onChange={handleChange} />
-            </div>
-            <br />
-            <div>
-              <label>Pitch</label>
+              <div className="form-floating">
+                <input
+                  type="text"
+                  className="form-control"
+                  id="floatingInput"
+                  name="pitch"
+                  onChange={handleChange}
+                  placeholder="0"
+                />
+                <label for="floatingInput">Pitch</label>
+              </div>
               <br />
-              <input type="text" name="pitch" onChange={handleChange} />
-            </div>
-            <br />
-            <div>
-              <label>Fotoğraf</label>
+              <div>
+                <label>Fotoğraf</label>
+                <br />
+                <input
+                  type="file"
+                  className="form-control"
+                  name="photo"
+                  onChange={handleFileChange}
+                  accept="image/png, image/jpeg, image/jpg"
+                />
+              </div>
               <br />
-              <input
-                type="file"
-                name="photo"
-                onChange={handleFileChange}
-                accept="image/png, image/jpeg, image/jpg"
-              />
-            </div>
-            <br />
-            <br />
-            <div className="row row-cols-auto">
-              <div className="col">
-                <Link href="/" className="text-primary">
+              <br />
+              <div className="row row-cols-auto">
+                <div className="col">
+                  <Link href="/" className="text-primary">
                     <button type="button" className="btn btn-primary">
                       Ana Sayfa
                     </button>
-                </Link>
+                  </Link>
+                </div>
+                <div className="col">
+                  <button type="submit" className="btn btn-success">
+                    Robot Ekle
+                  </button>
+                </div>
               </div>
-              <div className="col">
-                <button type="submit" className="btn btn-success">
-                  Robot Ekle
-                </button>
-              </div>
-            </div>
-          </form>
+            </form>
+          </div>
           <br />
         </div>
       </Layout>
