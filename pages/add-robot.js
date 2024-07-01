@@ -61,7 +61,7 @@ export default function AddRobot() {
   return (
     <>
       <Layout>
-        <PageHead headTitle="Add Robot" />
+        <PageHead headTitle="Robot Ekle" />
         <div className="container">
           <div className="row row-cols-auto">
             <form onSubmit={handleSubmit}>

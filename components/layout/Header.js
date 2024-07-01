@@ -10,8 +10,8 @@ const Header = () => {
               <img src='/assets/imgs/onder.png' alt="onderlift-logo" className="header-logo"></img>
             </Link>
             <Link href="/dashboard">
-              <h4>dashboard</h4>
-            </Link>
+{/*               <h4>dashboard</h4>
+ */}            </Link>
           </div>
         </header>
       </div>

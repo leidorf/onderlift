@@ -2259,4 +2259,13 @@ a:hover {
 .header-logo {
   width: 40px;
 }
-/*# sourceMappingURL=style.css.map */
+
+.robot-marker {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 13px solid red; /* Üçgenin rengi */
+  transform-origin: center;
+}

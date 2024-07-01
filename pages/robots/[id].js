@@ -5,69 +5,39 @@ import PageHead from "@/components/layout/PageHead";
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 
+import { getMapData, unsubscribeMap } from "@/lib/map";
+import odomListener from "@/lib/odom";
+import imuListener from "@/lib/imu";
+
+import { deletePath } from "@/utils/delete-path";
+import { handleAddPath } from "@/utils/add-path";
+import { nodeColors } from "@/utils/node-colors";
+import { deleteRobot } from "@/utils/delete-robot";
+import RosConnection from "@/components/RosConnection";
+
 export default function Robot({ robot, paths }) {
   const router = useRouter();
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
   const imageRef = useRef(null);
-  //Noktalar karismasin diye farkli renkler kaydedildi
-  const nodeColors = [
-    "red",
-    "blue",
-    "green",
-    "orange",
-    "purple",
-    "yellow",
-    "cyan",
-    "magenta",
-  ];
+  const odomData = odomListener();
+  const imuData = imuListener();
+  const [mapData, setMapData] = useState(null);
 
-  //Nokta ekleme fonksiyonu
-  const handleAddPath = async (x, y, z) => {
-    try {
-      await axios.post("/api/add-path", {
-        robot_id: robot.id,
-        x_position: x,
-        y_position: y,
-        z_position: z,
-      });
-
-      alert("Yol başarıyla eklendi!");
-      router.reload();
-    } catch (error) {
-      console.error("Yol ekleme hatası:", error);
-      alert("Yol ekleme sırasında bir hata oluştu.");
-    }
-  };
-
-  //Robot silme fonksiyonu
-  const handleDelete = async () => {
-    const confirmDelete = confirm(`Robot ${robot.id} silinsin mi?`);
-    if (confirmDelete) {
-      try {
-        await axios.delete(`/api/delete-robot?id=${robot.id}`);
-        alert("Robot başarıyla silindi!");
-        router.push("/"); // Anasayfaya yönlendir
-      } catch (error) {
-        console.error("Robot silme hatası:", error);
-        alert("Robot silme sırasında bir hata oluştu.");
-      }
-    }
+  //Robot silme fonskiyonu
+  const onDeleteRobot = async () => {
+    await deleteRobot(robot.id, router);
   };
 
   //Nokta silme fonksiyonu
-  const handleDeletePath = async (node_id) => {
-    const confirmDeletePath = confirm(`Yol silinsin mi?`);
-    if (confirmDeletePath) {
-      try {
-        await axios.delete(`/api/delete-path?node_id=${node_id}`);
-        alert("Yol başarıyla silindi!");
-        router.reload();
-      } catch (error) {
-        console.error("Yol silme hatası:", error);
-        alert("Yol silme sırasında bir hata oluştu.");
-      }
-    }
+  const onDeletePath = async (node_id) => {
+    await deletePath(node_id, router);
+  };
+
+  //Tüm noktalari silme fonksiyonu
+  const deleteAllPaths = async () => {
+    const deletePromises = paths.map((path) => onDeletePath(path.node_id));
+    await Promise.all(deletePromises);
   };
 
   //Harita görseli üzerindeki fare konumunun tespit eden fonksiyon
@@ -94,7 +64,7 @@ export default function Robot({ robot, paths }) {
   //Harita görseli uzerine tiklandiginda nokta ekleyen fonksiyon
   const handleImageClick = async () => {
     const { x, y } = mousePosition;
-    await handleAddPath(Number(x), Number(y), 0);
+    await handleAddPath(robot.id, Number(x), Number(y), 0, router);
   };
 
   //Sayfa veya harita görselinin boyutunu dinamik olarak tutan fonksiyon
@@ -117,6 +87,42 @@ export default function Robot({ robot, paths }) {
     };
   }, [imageRef.current]);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      const map = await getMapData();
+      setMapData(map);
+    };
+
+    fetchData();
+
+    return () => {
+      unsubscribeMap();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (mapData && canvasRef.current) {
+      const ctx = canvasRef.current.getContext("2d");
+      const { width, height, data } = mapData.info;
+      const imageData = ctx.createImageData(width, height);
+
+      for (let i = 0; i < data.length; i++) {
+        const value = data[i];
+        const color = value === -1 ? 205 : 255 - value;
+        imageData.data[i * 4] = color; // Red
+        imageData.data[i * 4 + 1] = color; // Green
+        imageData.data[i * 4 + 2] = color; // Blue
+        imageData.data[i * 4 + 3] = 255; // Alpha
+      }
+
+      ctx.putImageData(imageData, 0, 0);
+    }
+  }, [mapData]);
+
+  const robotXPos = imageSize.width / 2 + parseFloat(odomData.position.x);
+  const robotYPos = imageSize.height / 2 + parseFloat(odomData.position.y);
+  const robotRotation = `rotate(${imuData.yaw}rad)`;
+
   if (router.isFallback) {
     return <div>Loading...</div>;
   }
@@ -128,6 +134,9 @@ export default function Robot({ robot, paths }) {
         <div className="container h6">
           <div>
             <h4 className="text-primary">Robot ID: {robot.id}</h4>
+            <RosConnection />
+            {/*             <p>ROS Bağlantı Durumu: {connected ? "Bağlı." : "Bağlantı Sağlanamadı."}</p>
+            <p>{ros}</p> */}
             <br />
             {/* Robota ait konum ve aci bilgileri */}
             <div>
@@ -136,9 +145,9 @@ export default function Robot({ robot, paths }) {
                 <div className="col-3 bg-light fw-bold">Y Pozisyonu</div>
                 <div className="col-3 bg-light fw-bold">Z Pozisyonu</div>
                 <div className="w-100"></div>
-                <div className="col-3">{robot.x_position}</div>
-                <div className="col-3">{robot.y_position}</div>
-                <div className="col-3">{robot.z_position}</div>
+                <div className="col-3">{odomData.position.x}</div>
+                <div className="col-3">{odomData.position.y}</div>
+                <div className="col-3">{odomData.position.z}</div>
               </div>
               <br />
               <div className="row">
@@ -146,9 +155,9 @@ export default function Robot({ robot, paths }) {
                 <div className="col-3 bg-light fw-bold">Roll</div>
                 <div className="col-3 bg-light fw-bold">Pitch</div>
                 <div className="w-100"></div>
-                <div className="col-3">{robot.yaw}</div>
-                <div className="col-3">{robot.roll}</div>
-                <div className="col-3">{robot.pitch}</div>
+                <div className="col-3">{imuData.yaw}</div>
+                <div className="col-3">{imuData.roll}</div>
+                <div className="col-3">{imuData.pitch}</div>
               </div>
             </div>
             <br />
@@ -174,6 +183,15 @@ export default function Robot({ robot, paths }) {
                         {mousePosition.y.toFixed(2)}
                       </p>
                     </div>
+                    {/* Robota ait konum ve yönelim */}
+                    <div
+                      className="robot-marker"
+                      style={{
+                        top: `${robotYPos}px`,
+                        left: `${robotXPos}px`,
+                        transform: robotRotation,
+                      }}
+                    ></div>
 
                     {/* Robota ait noktalarin harita gorseli uzerinde gosterilmesi */}
                     {paths.map((path, index) => {
@@ -208,27 +226,37 @@ export default function Robot({ robot, paths }) {
                   (Silmek istediğiniz noktanın üzerine tıklayın.)
                 </p>
                 <br />
-                <ul>
-                  {paths.map((path, index) => (
-                    <li key={path.node_id}>
-                      <p>
-                        <span
-                          onClick={() => handleDeletePath(path.node_id)}
-                          className="text-primary text-decoration-underline"
-                        >
-                          Nokta {index + 1}
-                        </span>
-                        , X: {path.x_position}, Y: {path.y_position}, Z:{" "}
-                        {path.z_position}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
+                <div>
+                  <ul>
+                    {paths.map((path, index) => (
+                      <li key={path.node_id}>
+                        <p>
+                          <span
+                            onClick={() => onDeletePath(path.node_id)}
+                            className="text-primary text-decoration-underline"
+                          >
+                            Nokta {index + 1}
+                          </span>
+                          , X: {path.x_position}, Y: {path.y_position}, Z:{" "}
+                          {path.z_position}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                  <br />
+                  <button
+                    onClick={deleteAllPaths}
+                    className="btn btn-outline-danger"
+                  >
+                    Tüm Noktaları Sil
+                  </button>
+                </div>
               </div>
             </div>
             <p>Robot Kayıt Tarihi: {robot.creation}</p>
           </div>
           <br />
+
           {/* Butonlar */}
           <div className="row">
             <div className="col">
@@ -243,7 +271,7 @@ export default function Robot({ robot, paths }) {
                 </Link>
               </div>
               <div className="col-sm-6">
-                <button className="btn btn-danger" onClick={handleDelete}>
+                <button className="btn btn-danger" onClick={onDeleteRobot}>
                   Robotu Sil
                 </button>
               </div>
