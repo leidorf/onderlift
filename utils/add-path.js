@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const handleAddPath = async (robotId, x, y, z, router) => {
+export const handleAddPath = async (robotId, x, y, z) => {
   try {
     await axios.post("/api/add-path", {
       robot_id: robotId,
@@ -9,10 +9,7 @@ export const handleAddPath = async (robotId, x, y, z, router) => {
       z_position: z,
     });
 
-    alert("Yol başarıyla eklendi!");
-    router.reload();
   } catch (error) {
     console.error("Yol ekleme hatası:", error);
-    alert("Yol ekleme sırasında bir hata oluştu.");
   }
 };

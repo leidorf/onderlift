@@ -37,7 +37,7 @@ export default async function handler(req, res) {
 
       try {
         // Update photo in the database
-        await pool.query("UPDATE robot SET photo = ? WHERE id = ?", [
+        await pool.query("UPDATE robots SET photo = ? WHERE id = ?", [
           photoBase64,
           id,
         ]);

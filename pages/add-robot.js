@@ -9,16 +9,11 @@ export default function AddRobot() {
   const router = useRouter();
 
   const [robotData, setRobotData] = useState({
-    x_position: "",
-    y_position: "",
-    z_position: "",
-    yaw: "",
-    roll: "",
-    pitch: "",
+    ip_address: "",
     photo: null,
   });
 
-  const handleChange = (e) => {
+  const handleInputChange = (e) => {
     const { name, value } = e.target;
     setRobotData({
       ...robotData,
@@ -37,11 +32,9 @@ export default function AddRobot() {
     e.preventDefault();
 
     const formData = new FormData();
-    for (const key in robotData) {
-      if (robotData[key] !== null) {
-        // FormData'ya boş alan eklememek için kontrol
-        formData.append(key, robotData[key]);
-      }
+    formData.append("ip_address", robotData.ip_address);
+    if (robotData.photo) {
+      formData.append("photo", robotData.photo);
     }
 
     try {
@@ -59,116 +52,65 @@ export default function AddRobot() {
   };
 
   return (
-    <>
-      <Layout>
-        <PageHead headTitle="Robot Ekle" />
-        <div className="container">
-          <div className="row row-cols-auto">
-            <form onSubmit={handleSubmit}>
-              <div className="form-floating">
-                <input
-                  type="text"
-                  className="form-control"
-                  id="floatingInput"
-                  name="x_position"
-                  onChange={handleChange}
-                  placeholder="0"
-                />
-                <label for="floatingInput">X Pozisyonu</label>
-              </div>
-              <br />
-              <div className="form-floating">
-                <input
-                  type="text"
-                  className="form-control"
-                  id="floatingInput"
-                  name="y_position"
-                  onChange={handleChange}
-                  placeholder="0"
-                />
-                <label for="floatingInput">Y Pozisyonu</label>
-              </div>
-              <br />
-              <div className="form-floating">
-                <input
-                  type="text"
-                  className="form-control"
-                  id="floatingInput"
-                  name="z_position"
-                  onChange={handleChange}
-                  placeholder="0"
-                />
-                <label for="floatingInput">Z Pozisyonu</label>
-              </div>
-              <br />
-              <div className="form-floating">
-                <input
-                  type="text"
-                  className="form-control"
-                  id="floatingInput"
-                  name="yaw"
-                  onChange={handleChange}
-                  placeholder="0"
-                />
-                <label for="floatingInput">Yaw</label>
-              </div>
-              <br />
-              <div className="form-floating">
-                <input
-                  type="text"
-                  className="form-control"
-                  id="floatingInput"
-                  name="roll"
-                  onChange={handleChange}
-                  placeholder="0"
-                />
-                <label for="floatingInput">Roll</label>
-              </div>
-              <br />
-              <div className="form-floating">
-                <input
-                  type="text"
-                  className="form-control"
-                  id="floatingInput"
-                  name="pitch"
-                  onChange={handleChange}
-                  placeholder="0"
-                />
-                <label for="floatingInput">Pitch</label>
-              </div>
-              <br />
-              <div>
-                <label>Fotoğraf</label>
-                <br />
-                <input
-                  type="file"
-                  className="form-control"
-                  name="photo"
-                  onChange={handleFileChange}
-                  accept="image/png, image/jpeg, image/jpg"
-                />
-              </div>
-              <br />
-              <br />
-              <div className="row row-cols-auto">
-                <div className="col">
-                  <Link href="/" className="text-primary">
-                    <button type="button" className="btn btn-primary">
-                      Ana Sayfa
-                    </button>
-                  </Link>
-                </div>
-                <div className="col">
-                  <button type="submit" className="btn btn-success">
-                    Robot Ekle
+    <Layout>
+      <PageHead headTitle="Robot Ekle" />
+      <div className="container">
+        <div className="row row-cols-auto">
+          <form
+            onSubmit={handleSubmit}
+            className="col"
+          >
+            <div className="form-floating">
+              <input
+                type="text"
+                className="form-control"
+                id="ipAddress"
+                name="ip_address"
+                pattern="^([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\.([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])){3}$"
+                value={robotData.ip_address}
+                onChange={handleInputChange}
+                placeholder="IP Adresi"
+                required
+              />
+              <label for="ipAddress">IP Adresi</label>
+            </div>
+            <br />
+            <div className="form-group">
+              <label htmlFor="photo">Fotoğraf</label>
+              <input
+                type="file"
+                className="form-control"
+                id="photo"
+                name="photo"
+                onChange={handleFileChange}
+                accept="image/png, image/jpeg, image/jpg"
+                required
+              />
+            </div>
+            <br />
+            <div className="row row-cols-auto">
+              <div className="col">
+                <Link href="/">
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                  >
+                    Ana Sayfa
                   </button>
-                </div>
+                </Link>
               </div>
-            </form>
-          </div>
-          <br />
+              <div className="col">
+                <button
+                  type="submit"
+                  className="btn btn-success"
+                >
+                  Robot Ekle
+                </button>
+              </div>
+            </div>
+          </form>
         </div>
-      </Layout>
-    </>
+      </div>
+    </Layout>
   );
 }

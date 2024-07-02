@@ -9,6 +9,9 @@ export default function UpdateMap({ robot }) {
   const router = useRouter();
   const [photo, setPhoto] = useState(null);
 
+  const handleCancel = () => {
+    router.back();
+  };
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     setPhoto(file);
@@ -44,16 +47,14 @@ export default function UpdateMap({ robot }) {
       <Layout>
         <PageHead headTitle={`Haritayı Güncelle - Robot ${robot.id}`} />
         <div className="container">
-          <h5 className="text-danger">
+          <h5>
             Haritayı Güncelle - <strong>Robot {robot.id}</strong>
           </h5>
           <br />
           <div className="row row-cols-auto">
             <form onSubmit={handleSubmit}>
               <div className="form-group">
-                <label htmlFor="photo">
-                  Robot {robot.id} İçin Yeni Harita Resmi Seçin:
-                </label>
+                <label htmlFor="photo">Robot {robot.id} İçin Yeni Harita Resmi Seçin:</label>
                 <br />
                 <br />
                 <input
@@ -74,7 +75,18 @@ export default function UpdateMap({ robot }) {
                   </Link>
                 </div>
                 <div className="col">
-                  <button type="submit" className="btn btn-warning">
+                  <button
+                    className="btn btn-secondary"
+                    onClick={handleCancel}
+                  >
+                    İptal
+                  </button>
+                </div>
+                <div className="col">
+                  <button
+                    type="submit"
+                    className="btn btn-warning"
+                  >
                     Haritayı Güncelle
                   </button>
                 </div>

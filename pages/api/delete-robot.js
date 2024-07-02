@@ -12,7 +12,7 @@ export default async function handler(req, res) {
     await pool.query('DELETE FROM path WHERE robot_id = ?', [id]); // Path tablosundaki kayıtları sil
 
     // Şimdi robotu sil
-    await pool.query('DELETE FROM robot WHERE id = ?', [id]);
+    await pool.query('DELETE FROM robots WHERE id = ?', [id]);
 
     res.status(200).json({ success: true, message: 'Robot başarıyla silindi' });
   } catch (error) {

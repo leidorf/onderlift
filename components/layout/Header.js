@@ -7,7 +7,7 @@ const Header = () => {
         <header className="d-flex flex-wrap py-4 mb-4 border-bottom">
           <div className="row row-cols-auto align-items-center">
             <Link href="/">
-              <img src='/assets/imgs/onder.png' alt="onderlift-logo" className="header-logo"></img>
+              <img src='/assets/imgs/onderlift-logo.png' alt="onderlift-logo" className="header-logo"></img>
             </Link>
             <Link href="/dashboard">
 {/*               <h4>dashboard</h4>

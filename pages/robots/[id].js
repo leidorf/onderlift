@@ -1,43 +1,60 @@
 import { useRouter } from "next/router";
+import { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import Layout from "@/components/layout/Layout";
 import PageHead from "@/components/layout/PageHead";
 import Link from "next/link";
-import { useState, useRef, useEffect } from "react";
 
-import { getMapData, unsubscribeMap } from "@/lib/map";
 import odomListener from "@/lib/odom";
 import imuListener from "@/lib/imu";
+import RosConnection from "@/components/RosConnection";
 
-import { deletePath } from "@/utils/delete-path";
+import { deletePath, deletePathConf } from "@/utils/delete-path";
 import { handleAddPath } from "@/utils/add-path";
 import { nodeColors } from "@/utils/node-colors";
 import { deleteRobot } from "@/utils/delete-robot";
-import RosConnection from "@/components/RosConnection";
 
-export default function Robot({ robot, paths }) {
+export default function Robot({ robots, paths }) {
   const router = useRouter();
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
   const imageRef = useRef(null);
   const odomData = odomListener();
   const imuData = imuListener();
-  const [mapData, setMapData] = useState(null);
+  const [isDeletionEnabled, setIsDeletionEnabled] = useState(false);
+  const [isAddingNode, setIsAddingNode] = useState(false);
+
+  const robotXPos = imageSize.width / 2 +10 + parseFloat(odomData.position.x) * 20;
+  const robotYPos = imageSize.height / 2 - 10 + parseFloat(odomData.position.y) * -20;
+  const robotRotation = `rotate(${imuData.yaw}rad)`;
 
   //Robot silme fonskiyonu
   const onDeleteRobot = async () => {
-    await deleteRobot(robot.id, router);
+    await deleteRobot(robots.id);
+    router.push(`/`);
   };
 
   //Nokta silme fonksiyonu
   const onDeletePath = async (node_id) => {
-    await deletePath(node_id, router);
+    await deletePathConf(node_id);
+    router.reload();
   };
 
   //Tüm noktalari silme fonksiyonu
   const deleteAllPaths = async () => {
-    const deletePromises = paths.map((path) => onDeletePath(path.node_id));
-    await Promise.all(deletePromises);
+    const confirmDeleteAllPaths = confirm("Tüm yollar silinsin mi?");
+    if (confirmDeleteAllPaths) {
+      try {
+        const deletePromises = paths.map((path) => deletePath(path.node_id));
+        await Promise.all(deletePromises);
+        alert("Tüm yollar başarıyla silindi!");
+        router.reload();
+      } catch (error) {
+        console.error("Yolları silme hatası:", error);
+        alert("Yolları silme sırasında bir hata oluştu.");
+        router.reload();
+      }
+    }
   };
 
   //Harita görseli üzerindeki fare konumunun tespit eden fonksiyon
@@ -63,8 +80,12 @@ export default function Robot({ robot, paths }) {
 
   //Harita görseli uzerine tiklandiginda nokta ekleyen fonksiyon
   const handleImageClick = async () => {
-    const { x, y } = mousePosition;
-    await handleAddPath(robot.id, Number(x), Number(y), 0, router);
+    if (isAddingNode) {
+      const { x, y } = mousePosition;
+      await handleAddPath(robots.id, Number(x), Number(y), 0);
+      setIsAddingNode(!isAddingNode);
+      router.reload();
+    }
   };
 
   //Sayfa veya harita görselinin boyutunu dinamik olarak tutan fonksiyon
@@ -87,42 +108,6 @@ export default function Robot({ robot, paths }) {
     };
   }, [imageRef.current]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const map = await getMapData();
-      setMapData(map);
-    };
-
-    fetchData();
-
-    return () => {
-      unsubscribeMap();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (mapData && canvasRef.current) {
-      const ctx = canvasRef.current.getContext("2d");
-      const { width, height, data } = mapData.info;
-      const imageData = ctx.createImageData(width, height);
-
-      for (let i = 0; i < data.length; i++) {
-        const value = data[i];
-        const color = value === -1 ? 205 : 255 - value;
-        imageData.data[i * 4] = color; // Red
-        imageData.data[i * 4 + 1] = color; // Green
-        imageData.data[i * 4 + 2] = color; // Blue
-        imageData.data[i * 4 + 3] = 255; // Alpha
-      }
-
-      ctx.putImageData(imageData, 0, 0);
-    }
-  }, [mapData]);
-
-  const robotXPos = imageSize.width / 2 + parseFloat(odomData.position.x);
-  const robotYPos = imageSize.height / 2 + parseFloat(odomData.position.y);
-  const robotRotation = `rotate(${imuData.yaw}rad)`;
-
   if (router.isFallback) {
     return <div>Loading...</div>;
   }
@@ -130,13 +115,13 @@ export default function Robot({ robot, paths }) {
   return (
     <>
       <Layout>
-        <PageHead headTitle={`Robot ${robot.id}`} />
+        <PageHead headTitle={`Robot ${robots.id}`} />
         <div className="container h6">
           <div>
-            <h4 className="text-primary">Robot ID: {robot.id}</h4>
+            <h4>
+              Robot ID: {robots.id}({robots.ip_address})
+            </h4>
             <RosConnection />
-            {/*             <p>ROS Bağlantı Durumu: {connected ? "Bağlı." : "Bağlantı Sağlanamadı."}</p>
-            <p>{ros}</p> */}
             <br />
             {/* Robota ait konum ve aci bilgileri */}
             <div>
@@ -164,11 +149,11 @@ export default function Robot({ robot, paths }) {
             <div className="row row-col-auto">
               <div className="col">
                 {/* Robota ait harita gorseli */}
-                <p>Harita:</p>
-                {robot.photo && (
+                <p>Harita: {isAddingNode && <span> Nokta Ekleme Modu Aktif</span>}</p>
+                {robots.photo && (
                   <div style={{ position: "relative" }}>
                     <img
-                      src={`data:image/jpeg;base64,${robot.photo}`}
+                      src={`data:image/jpeg;base64,${robots.photo}`}
                       alt="Robot Harita"
                       onClick={handleImageClick}
                       onMouseMove={handleMouseMove}
@@ -179,10 +164,18 @@ export default function Robot({ robot, paths }) {
                     {/* Harita gorseli uzerindeki fare bilgilerinin yansitilmasi */}
                     <div className="mouse-info">
                       <p>
-                        Fare Konumu: X: {mousePosition.x.toFixed(2)}, Y:{" "}
-                        {mousePosition.y.toFixed(2)}
+                        Fare Konumu: X: {mousePosition.x.toFixed(2)}, Y: {mousePosition.y.toFixed(2)}
                       </p>
                     </div>
+                    <button
+                      onClick={() => setIsAddingNode(!isAddingNode)}
+                      className={`point-icon btn ${isAddingNode ? "active-mode" : ""}`}
+                    >
+                      <img
+                        src="/assets/imgs/point-icon.png"
+                        alt="Point Icon"
+                      />
+                    </button>
                     {/* Robota ait konum ve yönelim */}
                     <div
                       className="robot-marker"
@@ -196,10 +189,8 @@ export default function Robot({ robot, paths }) {
                     {/* Robota ait noktalarin harita gorseli uzerinde gosterilmesi */}
                     {paths.map((path, index) => {
                       const color = nodeColors[index % nodeColors.length];
-                      const xPos =
-                        imageSize.width / 2 + parseFloat(path.x_position);
-                      const yPos =
-                        imageSize.height / 2 + parseFloat(path.y_position);
+                      const xPos = imageSize.width / 2 + parseFloat(path.x_position);
+                      const yPos = imageSize.height / 2 + parseFloat(path.y_position);
                       return (
                         <div
                           key={path.node_id}
@@ -209,36 +200,47 @@ export default function Robot({ robot, paths }) {
                             left: `${xPos}px`,
                             backgroundColor: color,
                           }}
-                          title={`Nokta ${index + 1}: X: ${
-                            path.x_position
-                          } - Y: ${path.y_position}`}
+                          title={`Nokta ${index + 1}: X: ${path.x_position} - Y: ${path.y_position}`}
                         />
                       );
                     })}
                   </div>
                 )}
               </div>
-              <div className="col-sm-3">
+              <div className="col-3">
                 <br />
                 {/* Robota ait noktalarin yansitilmasi */}
-                <h5>Robotun Yolları:</h5>
-                <p className="fw-lighter">
-                  (Silmek istediğiniz noktanın üzerine tıklayın.)
-                </p>
+                <div>
+                  <h5>Robotun Yolları:</h5>
+                  <input
+                    type="checkbox"
+                    checked={isDeletionEnabled}
+                    onChange={() => setIsDeletionEnabled(!isDeletionEnabled)}
+                  />
+                  <label
+                    onClick={() => setIsDeletionEnabled(!isDeletionEnabled)}
+                    style={{ color: isDeletionEnabled ? "black" : "gray", cursor: "pointer", marginLeft: "5px" }}
+                  >
+                    Nokta silme modu
+                  </label>
+                </div>
+                <p className="fw-lighter">(Silmek istediğiniz noktanın üzerine tıklayın.)</p>
                 <br />
                 <div>
                   <ul>
                     {paths.map((path, index) => (
                       <li key={path.node_id}>
-                        <p>
-                          <span
+                        <p className="text-wrap">
+                          <button
                             onClick={() => onDeletePath(path.node_id)}
-                            className="text-primary text-decoration-underline"
+                            className={`text-${
+                              isDeletionEnabled ? "danger" : "muted"
+                            } btn btn-link text-decoration-none`}
+                            disabled={!isDeletionEnabled}
                           >
                             Nokta {index + 1}
-                          </span>
-                          , X: {path.x_position}, Y: {path.y_position}, Z:{" "}
-                          {path.z_position}
+                          </button>
+                          X: {path.x_position}, Y: {path.y_position}, Z: {Number(path.z_position).toFixed(2)}
                         </p>
                       </li>
                     ))}
@@ -246,32 +248,36 @@ export default function Robot({ robot, paths }) {
                   <br />
                   <button
                     onClick={deleteAllPaths}
-                    className="btn btn-outline-danger"
+                    className={`btn ${isDeletionEnabled ? "btn-outline-danger" : "btn-outline-secondary"}`}
+                    disabled={!isDeletionEnabled}
                   >
                     Tüm Noktaları Sil
                   </button>
                 </div>
               </div>
             </div>
-            <p>Robot Kayıt Tarihi: {robot.creation}</p>
+            <p>Robot Kayıt Tarihi: {new Date(robots.creation).toLocaleString("tr-TR")}</p>
           </div>
           <br />
 
           {/* Butonlar */}
-          <div className="row">
-            <div className="col">
+          <div className="d-flex">
+            <div className="me-auto">
               <Link href={`/`}>
                 <button className="btn btn-primary">Ana Sayfa</button>
               </Link>
             </div>
-            <div className="col-3 row">
-              <div className="col-sm-6">
-                <Link href={`/update-map?id=${robot.id}`}>
+            <div className="d-flex row row-cols-auto">
+              <div className="col">
+                <Link href={`/update-map?id=${robots.id}`}>
                   <button className="btn btn-warning">Haritayı Güncelle</button>
                 </Link>
               </div>
-              <div className="col-sm-6">
-                <button className="btn btn-danger" onClick={onDeleteRobot}>
+              <div className="col">
+                <button
+                  className="btn btn-danger"
+                  onClick={onDeleteRobot}
+                >
                   Robotu Sil
                 </button>
               </div>
@@ -287,8 +293,8 @@ export async function getStaticPaths() {
   const response = await axios.get("http://localhost:3000/api/robots");
   const robots = response.data;
 
-  const paths = robots.map((robot) => ({
-    params: { id: robot.id.toString() },
+  const paths = robots.map((robots) => ({
+    params: { id: robots.id.toString() },
   }));
 
   return {
@@ -305,7 +311,7 @@ export async function getStaticProps({ params }) {
 
   return {
     props: {
-      robot: robotRes.data,
+      robots: robotRes.data,
       paths: pathsRes.data,
     },
   };

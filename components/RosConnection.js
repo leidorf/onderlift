@@ -7,12 +7,18 @@ export default function RosConnection() {
   useEffect(() => {
     const connectRos = async () => {
       try {
+        ros.on("connection", () => {
+          setIsConnected(true);
+        });
+
+        ros.on("close", () => {
+          setIsConnected(false);
+        });
+
         await ros.connect(); // Assuming connect() is a function in ros.js
-        setIsConnected(true);
-        console.log("ROS bağlandı!");
       } catch (error) {
         setIsConnected(false);
-        console.error("ROS bağlantı hatası:", error);
+        console.error(error);
       }
     };
 
@@ -25,7 +31,10 @@ export default function RosConnection() {
 
   return (
     <div>
-      <p>ROS Bağlantısı Durumu: {isConnected ? "Bağlandı" : "Bağlanmadı"}</p>
+      <p>
+        ROS Bağlantı Durumu:
+        <span style={{ color: isConnected ? "green" : "red" }}>{isConnected ? " Bağlandı" : " Bağlanmadı"}</span>
+      </p>
     </div>
   );
 }

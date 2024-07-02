@@ -18,7 +18,7 @@ export default async function handler(req, res) {
         return res.status(500).json({ success: false, error: 'Form parse hatası' });
       }
 
-      const { x_position, y_position, z_position, yaw, roll, pitch } = fields;
+      const { ip_address } = fields;
       let photoBase64 = null;
 
       if (files.photo) {
@@ -33,16 +33,11 @@ export default async function handler(req, res) {
 
       try {
         const query = `
-          INSERT INTO robot (x_position, y_position, z_position, yaw, roll, pitch, photo)
-          VALUES (?, ?, ?, ?, ?, ?, ?)
+          INSERT INTO robots (ip_address, photo, creation)
+          VALUES (?, ?, CURRENT_TIMESTAMP())
         `;
         const [result] = await pool.query(query, [
-          x_position,
-          y_position,
-          z_position,
-          yaw,
-          roll,
-          pitch,
+          ip_address,
           photoBase64,
         ]);
 
