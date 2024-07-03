@@ -3,6 +3,7 @@ import Layout from "@/components/layout/Layout";
 import PageHead from "@/components/layout/PageHead";
 import React from "react";
 import axios from "axios";
+import RosConnection from "@/components/RosConnection";
 
 export default function HomePage({ robots }) {
   return (
@@ -19,12 +20,9 @@ export default function HomePage({ robots }) {
                       <h5 className="text-decoration-underline">
                         <Link href={`/robots/${robot.id}`}>Robot ID: {robot.id}</Link>
                       </h5>
-                      IP Adresi: {robot.ip_address}<br/>
-                      {robot.photo && (
-                        <span>
-                          Harita Kayıtlı <br />
-                        </span>
-                      )}
+                      IP Adresi: {robot.ip_address}
+                      <br />
+                      <RosConnection />
                       <p>Oluşturulma Tarihi: {new Date(robot.creation).toLocaleString("tr-TR")}</p>
                     </div>
                     <br />

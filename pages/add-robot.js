@@ -75,7 +75,7 @@ export default function AddRobot() {
               <label for="ipAddress">IP Adresi</label>
             </div>
             <br />
-            <div className="form-group">
+{/*             <div className="form-group">
               <label htmlFor="photo">Fotoğraf</label>
               <input
                 type="file"
@@ -84,9 +84,8 @@ export default function AddRobot() {
                 name="photo"
                 onChange={handleFileChange}
                 accept="image/png, image/jpeg, image/jpg"
-                required
               />
-            </div>
+            </div> */}
             <br />
             <div className="row row-cols-auto">
               <div className="col">

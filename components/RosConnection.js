@@ -1,23 +1,34 @@
-import { useState, useEffect } from "react";
-import ros from "@/lib/ros"; // Adjust the path as necessary
+import { useState, useEffect } from 'react';
+import ros from '@/lib/ros'; // Adjust the path as necessary
 
 export default function RosConnection() {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
+
+    const handleConnection = () => {
+      if (isMounted) {
+        setIsConnected(true);
+      }
+    };
+
+    const handleClose = () => {
+      if (isMounted) {
+        setIsConnected(false);
+      }
+    };
+
+    ros.on('connection', handleConnection);
+    ros.on('close', handleClose);
+
     const connectRos = async () => {
       try {
-        ros.on("connection", () => {
-          setIsConnected(true);
-        });
-
-        ros.on("close", () => {
-          setIsConnected(false);
-        });
-
-        await ros.connect(); // Assuming connect() is a function in ros.js
+        await ros.customConnect(); // Assuming customConnect() is a function in ros.js
       } catch (error) {
-        setIsConnected(false);
+        if (isMounted) {
+          setIsConnected(false);
+        }
         console.error(error);
       }
     };
@@ -25,7 +36,10 @@ export default function RosConnection() {
     connectRos();
 
     return () => {
-      ros.close(); // Adjust as per your ros.js implementation
+      isMounted = false;
+      ros.off('connection', handleConnection);
+      ros.off('close', handleClose);
+      // Note: Do not call ros.close() here to avoid closing the connection on unmount
     };
   }, []);
 
@@ -33,7 +47,9 @@ export default function RosConnection() {
     <div>
       <p>
         ROS Bağlantı Durumu:
-        <span style={{ color: isConnected ? "green" : "red" }}>{isConnected ? " Bağlandı" : " Bağlanmadı"}</span>
+        <span style={{ color: isConnected ? 'green' : 'red' }} className='fw-bolder'>
+          {isConnected ? ' Bağlandı' : ' Bağlanmadı'}
+        </span>
       </p>
     </div>
   );
