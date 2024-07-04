@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import ros from '@/lib/ros'; // Adjust the path as necessary
+import { useState, useEffect } from "react";
+import ros from "@/lib/ros"; // Adjust the path as necessary
 
 export default function RosConnection() {
   const [isConnected, setIsConnected] = useState(false);
@@ -19,8 +19,8 @@ export default function RosConnection() {
       }
     };
 
-    ros.on('connection', handleConnection);
-    ros.on('close', handleClose);
+    ros.on("connection", handleConnection);
+    ros.on("close", handleClose);
 
     const connectRos = async () => {
       try {
@@ -37,8 +37,8 @@ export default function RosConnection() {
 
     return () => {
       isMounted = false;
-      ros.off('connection', handleConnection);
-      ros.off('close', handleClose);
+      ros.off("connection", handleConnection);
+      ros.off("close", handleClose);
       // Note: Do not call ros.close() here to avoid closing the connection on unmount
     };
   }, []);
@@ -47,8 +47,11 @@ export default function RosConnection() {
     <div>
       <p>
         ROS Bağlantı Durumu:
-        <span style={{ color: isConnected ? 'green' : 'red' }} className='fw-bolder'>
-          {isConnected ? ' Bağlandı' : ' Bağlanmadı'}
+        <span
+          style={{ color: isConnected ? "green" : "red" }}
+          className="fw-bolder"
+        >
+          {isConnected ? " Bağlandı" : " Bağlanmadı"}
         </span>
       </p>
     </div>

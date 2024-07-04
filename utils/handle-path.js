@@ -21,6 +21,15 @@ export const deletePathConf = async (node_id) => {
   }
 };
 
+export const deleteAllPaths = async (paths) => {
+  try {
+    const deletePromises = paths.map((path) => deletePath(path.node_id));
+    await Promise.all(deletePromises);
+  } catch (error) {
+    console.error("Tüm yolları silerken hatayla karşılaşıldı:", error)
+  }
+}
+
 export const addPath = async (robotId, x, y, z) => {
   try {
     await axios.post("/api/add-path", {

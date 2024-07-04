@@ -20,9 +20,9 @@ export default function HomePage({ robots }) {
                       <h5 className="text-decoration-underline">
                         <Link href={`/robots/${robot.id}`}>Robot ID: {robot.id}</Link>
                       </h5>
+                      <RosConnection />
                       IP Adresi: {robot.ip_address}
                       <br />
-                      <RosConnection />
                       <p>Oluşturulma Tarihi: {new Date(robot.creation).toLocaleString("tr-TR")}</p>
                     </div>
                     <br />

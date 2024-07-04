@@ -21,17 +21,6 @@ const Test = () => {
               Anasayfa
             </Link>
           </h5>
-          <div>
-            {mapData ? (
-              <canvas
-                ref={canvasRef}
-                width={mapData.info.width}
-                height={mapData.info.height}
-              />
-            ) : (
-              <p>Loading map data...</p>
-            )}
-          </div>
         </div>
       </Layout>
     </>

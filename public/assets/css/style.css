@@ -693,11 +693,10 @@ a:hover {
 }
 
 .robot-marker {
+  height: 15px;
+  width: 15px;
   position: absolute;
-  width: 5px;
-  height: 5px;
-  transform-origin: center;
-  background-color: red;
+  z-index: 15;
 }
 
 .point-icon {
@@ -715,4 +714,8 @@ a:hover {
 .active-mode {
   border: 2px solid #BE1522; 
   background-color: rgba(255, 255, 255, 0.7);
+}
+
+.map-image {
+  zoom: 1; /* initial zoom */
 }

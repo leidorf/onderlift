@@ -1,76 +1,101 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import useMapData from "@/utils/use-map-data";
+import { nodeColors } from "@/utils/node-colors";
+import React, { useEffect } from "react";
 
-const MapDisplay = ({
-  isAddingNode,
-  setIsAddingNode,
-  canvasRef,
-  handleImageClick,
-  handleMouseMove,
-  handleImageLoad,
-  mousePosition,
-  imageSize,
-  robotYPos,
-  robotXPos,
-  robotRotation,
-  paths,
-  nodeColors,
-  robots
-}) => {
-  const [mapData, setMapData] = useState(null);
+const MapDisplay = ({ robot_id, paths, robotXPos, robotYPos, robotYaw }) => {
+  const {
+    mapData,
+    canvasRef,
+    handleMouseMove,
+    handleImageClick,
+    handleImageLoad,
+    isAddingNode,
+    setIsAddingNode,
+    mousePosition,
+    imageSize,
+    setImageSize,
+  } = useMapData(robot_id);
+
+  const handleWheel = (event) => {
+    const { deltaY } = event;
+    const zoomFactor = deltaY > 0 ? 2 : 1;
+    const mapImage = document.querySelector('.map-image');
+    const currentWidth = mapImage.offsetWidth;
+    const currentHeight = mapImage.offsetHeight;
+    const newWidth = currentWidth * zoomFactor;
+    const newHeight = currentHeight * zoomFactor;
+    setImageSize({ width: newWidth, height: newHeight });
+    mapImage.style.transformOrigin = '0 0'; // set transform origin to top-left corner
+    mapImage.style.transform = `scale(${zoomFactor})`;
+  };
 
   useEffect(() => {
-    const fetchMapData = async () => {
-      try {
-        const response = await axios.get(`/api/robots/${robots.id}`); // API endpoint'inizin yolunu doğru şekilde ayarlayın
-        setMapData(response.data); // API'den gelen harita verisini state'e kaydediyoruz
-      } catch (error) {
-        console.error('Harita verisini alma hatası:', error);
+    const handleResize = () => {
+      if (canvasRef.current) {
+        setImageSize({
+          width: canvasRef.current.offsetWidth,
+          height: canvasRef.current.offsetHeight,
+        });
       }
     };
 
-    fetchMapData(); // useEffect ile bileşen yüklendiğinde harita verisini almak için çağırıyoruz
-  }, []);
+    window.addEventListener("resize", handleResize);
+    handleResize();
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [canvasRef.current]);
 
   return (
     <div>
       <p>Harita: {isAddingNode && <span> Nokta Ekleme Modu Aktif</span>}</p>
       <div style={{ position: "relative" }}>
-        {mapData ? (
-          <canvas
-            ref={canvasRef}
-            width={mapData.width} // Örneğin, API'den gelen veriye göre genişlik ve yüksekliği ayarlayın
-            height={mapData.height}
-            onClick={handleImageClick}
-            onMouseMove={handleMouseMove}
-            onLoad={handleImageLoad}
-          />
-        ) : (
-          <div className="spinner-border spinner-border-sm" role="status">
+        {!mapData ? (
+          <div
+            className="spinner-border spinner-border-sm"
+            role="status"
+          >
             <span className="visually-hidden">Loading...</span>
           </div>
-        )}
-        {!mapData ? null : (
+        ) : (
           <>
+            <canvas
+              ref={canvasRef}
+              width={mapData.info.width} // Örneğin, API'den gelen veriye göre genişlik ve yüksekliği ayarlayın
+              height={mapData.info.height}
+              onClick={handleImageClick}
+              onMouseMove={handleMouseMove}
+              onLoad={handleImageLoad}
+              onWheel={handleWheel}
+              className="map-image"
+            />
             <div className="mouse-info">
               <p>
-                Fare Konumu: X: {mousePosition.x.toFixed(2)}, Y: {mousePosition.y.toFixed(2)}
+                Fare Konumu: X: {((mousePosition.x - 10) / 20).toFixed(5)}, Y:{" "}
+                {((mousePosition.y + 10) / -20).toFixed(5)}
               </p>
             </div>
             <button
               onClick={() => setIsAddingNode(!isAddingNode)}
               className={`point-icon btn ${isAddingNode ? "active-mode" : ""}`}
             >
-              <img src="/assets/imgs/point-icon.png" alt="Point Icon" />
+              <img
+                src="/assets/imgs/point-icon.png"
+                alt="Point Icon"
+              />
             </button>
-            <div
-              className="robot-marker"
-              style={{
-                top: `${robotYPos}px`,
-                left: `${robotXPos}px`,
-                transform: robotRotation,
-              }}
-            ></div>
+            <div>
+              <img
+                className="robot-marker"
+                style={{
+                  left: `${imageSize.width / 2 + (0.3 + robotXPos) * 20}px`,
+                  top: `${imageSize.height / 2 + (-0.3 + robotYPos) * -20}px`,
+                  transform: `rotate(${robotYaw * (180 / Math.PI)}deg)`,
+                }}
+                src="/assets/imgs/onder.png"
+              ></img>
+            </div>
             {paths.map((path, index) => {
               const color = nodeColors[index % nodeColors.length];
               const xPos = imageSize.width / 2 + parseFloat(path.x_position);
@@ -84,7 +109,10 @@ const MapDisplay = ({
                     left: `${xPos}px`,
                     backgroundColor: color,
                   }}
-                  title={`Nokta ${index + 1}: X: ${path.x_position} - Y: ${path.y_position}`}
+                  title={`Nokta ${index + 1}: X: ${((mousePosition.x - 10) / 20).toFixed(5)} - Y: ${(
+                    (mousePosition.y + 10) /
+                    -20
+                  ).toFixed(5)}`}
                 />
               );
             })}

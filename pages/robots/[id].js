@@ -1,45 +1,27 @@
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import axios from "axios";
 
 import Layout from "@/components/layout/Layout";
 import PageHead from "@/components/layout/PageHead";
 
-import odomListener from "@/lib/odom";
-import imuListener from "@/lib/imu";
-import useMapData from "@/utils/use-map-data";
-
 import RosConnection from "@/components/RosConnection";
 import MapDisplay from "@/components/MapDisplay";
+import odomListener from "@/lib/odom";
 
-import { deletePath } from "@/utils/handle-path";
-import { nodeColors } from "@/utils/node-colors";
+import { deletePath, deleteAllPaths } from "@/utils/handle-path";
 import { deleteRobot } from "@/utils/delete-robot";
-import { updateMap } from "@/utils/update-map";
 
 export default function Robot({ robots, paths }) {
   const router = useRouter();
   const odomData = odomListener();
-  const imuData = imuListener();
-  const {
-    mapData,
-    canvasRef,
-    handleMouseMove,
-    handleImageClick,
-    handleImageLoad,
-    isAddingNode,
-    setIsAddingNode,
-    mousePosition,
-    imageSize,
-    setImageSize,
-  } = useMapData(robots.id);
 
   const [isDeletionEnabled, setIsDeletionEnabled] = useState(false);
 
-  const robotXPos = imageSize.width / 2 + 10 + parseFloat(odomData.position.x) * 20;
-  const robotYPos = imageSize.height / 2 - 10 + parseFloat(odomData.position.y) * -20;
-  const robotRotation = `rotate(${imuData.yaw}rad)`;
+  const robotXPos = parseFloat(odomData.position.x);
+  const robotYPos = parseFloat(odomData.position.y);
+  const robotYaw = odomData.orientation.yaw;
 
   const onDeleteRobot = async () => {
     await deleteRobot(robots.id);
@@ -51,43 +33,13 @@ export default function Robot({ robots, paths }) {
     router.reload();
   };
 
-  const deleteAllPaths = async () => {
+  const onDeleteAllPaths = async () => {
     const confirmDeleteAllPaths = confirm("Tüm yollar silinsin mi?");
     if (confirmDeleteAllPaths) {
-      try {
-        const deletePromises = paths.map((path) => deletePath(path.node_id));
-        await Promise.all(deletePromises);
-        alert("Tüm yollar başarıyla silindi!");
-        router.reload();
-      } catch (error) {
-        console.error("Yolları silme hatası:", error);
-        alert("Yolları silme sırasında bir hata oluştu.");
-        router.reload();
-      }
+      await deleteAllPaths(paths);
+      router.reload();
     }
   };
-
-  const handleUpdateMap = () => {
-    updateMap(robots.id, mapData); // robots.id ve mapData değişkenleri mevcut bileşeninizden alınan değerlerdir
-  };
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (canvasRef.current) {
-        setImageSize({
-          width: canvasRef.current.offsetWidth,
-          height: canvasRef.current.offsetHeight,
-        });
-      }
-    };
-
-    window.addEventListener("resize", handleResize);
-    handleResize();
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, [canvasRef.current]);
 
   if (router.isFallback) {
     return <div>Loading...</div>;
@@ -120,30 +72,20 @@ export default function Robot({ robots, paths }) {
                 <div className="col-3 bg-light fw-bold">Roll</div>
                 <div className="col-3 bg-light fw-bold">Pitch</div>
                 <div className="w-100"></div>
-                <div className="col-3">{imuData.yaw}</div>
-                <div className="col-3">{imuData.roll}</div>
-                <div className="col-3">{imuData.pitch}</div>
+                <div className="col-3">{odomData.orientation.yaw}</div>
+                <div className="col-3">{odomData.orientation.roll}</div>
+                <div className="col-3">{odomData.orientation.pitch}</div>
               </div>
             </div>
             <br />
             <div className="row row-col-auto">
               <div className="col">
                 <MapDisplay
-                  isAddingNode={isAddingNode}
-                  setIsAddingNode={setIsAddingNode}
-                  mapData={mapData}
-                  canvasRef={canvasRef}
-                  handleImageClick={handleImageClick}
-                  handleMouseMove={handleMouseMove}
-                  handleImageLoad={handleImageLoad}
-                  mousePosition={mousePosition}
-                  imageSize={imageSize}
-                  robotYPos={robotYPos}
-                  robotXPos={robotXPos}
-                  robotRotation={robotRotation}
+                  robot_id={robots.id}
                   paths={paths}
-                  nodeColors={nodeColors}
-                  robots={robots}
+                  robotXPos={robotXPos}
+                  robotYPos={robotYPos}
+                  robotYaw={robotYaw}
                 />
               </div>
 
@@ -171,6 +113,7 @@ export default function Robot({ robots, paths }) {
                       <li key={path.node_id}>
                         <p className="text-wrap">
                           <button
+                            style={{ paddingLeft: "0px" }}
                             onClick={() => onDeletePath(path.node_id)}
                             className={`text-${
                               isDeletionEnabled ? "danger" : "muted"
@@ -179,19 +122,22 @@ export default function Robot({ robots, paths }) {
                           >
                             Nokta {index + 1}
                           </button>
-                          X: {path.x_position}, Y: {path.y_position}, Z: {Number(path.z_position).toFixed(2)}
+                          X: {((Number(path.x_position) - 10) / 20).toFixed(3)}, Y:{" "}
+                          {((Number(path.y_position) + 10) / -20).toFixed(3)}, Z: {Number(path.z_position).toFixed(3)}
                         </p>
                       </li>
                     ))}
                   </ul>
                   <br />
-                  <button
-                    onClick={deleteAllPaths}
-                    className={`btn ${isDeletionEnabled ? "btn-outline-danger" : "btn-outline-secondary"}`}
-                    disabled={!isDeletionEnabled}
-                  >
-                    Tüm Noktaları Sil
-                  </button>
+                  <div className="d-flex">
+                    <button
+                      onClick={onDeleteAllPaths}
+                      className={`btn ms-auto ${isDeletionEnabled ? "btn-outline-danger" : "btn-outline-secondary"}`}
+                      disabled={!isDeletionEnabled}
+                    >
+                      Tüm Noktaları Sil
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -208,7 +154,8 @@ export default function Robot({ robots, paths }) {
               <div className="col">
                 <button
                   className="btn btn-warning"
-                  onClick={handleUpdateMap}
+                  /*                   onClick={onHandleUpdateMap}
+                   */
                 >
                   Haritayı Güncelle
                 </button>

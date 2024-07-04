@@ -12,13 +12,11 @@ const useMapData = (robotId) => {
   const router = useRouter();
 
   useEffect(() => {
-    // Subscribe to the map topic
     mapTopic.subscribe((message) => {
       console.log("Received map data:", message);
       setMapData(message);
     });
 
-    // Clean up on component unmount
     return () => {
       mapTopic.unsubscribe();
     };
@@ -69,7 +67,6 @@ const useMapData = (robotId) => {
     }
   };
   
-
   const handleImageClick = async () => {
     if (isAddingNode) {
       const { x, y } = mousePosition;
