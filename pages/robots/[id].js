@@ -12,6 +12,7 @@ import odomListener from "@/lib/odom";
 
 import { deletePath, deleteAllPaths } from "@/utils/handle-path";
 import { deleteRobot } from "@/utils/delete-robot";
+import { findEdgeNodes } from "@/utils/edge-nodes";
 
 export default function Robot({ robots, paths }) {
   const router = useRouter();
@@ -22,6 +23,11 @@ export default function Robot({ robots, paths }) {
   const robotXPos = parseFloat(odomData.position.x);
   const robotYPos = parseFloat(odomData.position.y);
   const robotYaw = odomData.orientation.yaw;
+
+  const handleFindNodes = () => {
+    const edgeNodes = findEdgeNodes(paths, robotXPos, robotYPos);
+    console.log("Start Node ID:", edgeNodes.startNodeId);
+  };
 
   const onDeleteRobot = async () => {
     await deleteRobot(robots.id);
@@ -122,8 +128,9 @@ export default function Robot({ robots, paths }) {
                           >
                             Nokta {index + 1}
                           </button>
-                          X: {((Number(path.x_position) - 10) / 20).toFixed(3)}, Y:{" "}
-                          {((Number(path.y_position) + 10) / -20).toFixed(3)}, Z: {Number(path.z_position).toFixed(3)}
+                          {(path.node_id)} 
+                           X: {Number(path.x_position).toFixed(3)}, Y:{" "}
+                          {Number(path.y_position).toFixed(3)}, Z: {Number(path.z_position).toFixed(3)}
                         </p>
                       </li>
                     ))}
@@ -131,11 +138,21 @@ export default function Robot({ robots, paths }) {
                   <br />
                   <div className="d-flex">
                     <button
+                      onClick={handleFindNodes}
+                      className={`btn ${
+                        paths.length !== 0 && odomData.position && odomData.position.x !== 0
+                          ? "btn-success"
+                          : "btn-outline-secondary disabled"
+                      }`}
+                    >
+                      Görevi Başlat
+                    </button>
+                    <button
                       onClick={onDeleteAllPaths}
                       className={`btn ms-auto ${isDeletionEnabled ? "btn-outline-danger" : "btn-outline-secondary"}`}
                       disabled={!isDeletionEnabled}
                     >
-                      Tüm Noktaları Sil
+                      Hepsini Sil
                     </button>
                   </div>
                 </div>
@@ -143,6 +160,7 @@ export default function Robot({ robots, paths }) {
             </div>
             <p>Robot Kayıt Tarihi: {new Date(robots.creation).toLocaleString("tr-TR")}</p>
           </div>
+
           <br />
           <div className="d-flex">
             <div className="me-auto">

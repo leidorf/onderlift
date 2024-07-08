@@ -70,7 +70,7 @@ const useMapData = (robotId) => {
   const handleImageClick = async () => {
     if (isAddingNode) {
       const { x, y } = mousePosition;
-      await addPath(robotId, Number(x), Number(y), 0);
+      await addPath(robotId, (Number(x)-10)/20, ((Number(y)+10)/-20), 0);
       setIsAddingNode(!isAddingNode);
       router.reload();
     }

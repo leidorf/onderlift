@@ -1,6 +1,6 @@
 import useMapData from "@/utils/use-map-data";
 import { nodeColors } from "@/utils/node-colors";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 const MapDisplay = ({ robot_id, paths, robotXPos, robotYPos, robotYaw }) => {
   const {
@@ -16,16 +16,19 @@ const MapDisplay = ({ robot_id, paths, robotXPos, robotYPos, robotYaw }) => {
     setImageSize,
   } = useMapData(robot_id);
 
+  const [zoomFactor, setZoomFactor] = useState(1);
+
   const handleWheel = (event) => {
     const { deltaY } = event;
-    const zoomFactor = deltaY > 0 ? 2 : 1;
-    const mapImage = document.querySelector('.map-image');
+    const zoomFactor = deltaY > 1 ? 1 : 2.25;
+    setZoomFactor(zoomFactor);
+    const mapImage = document.querySelector(".map-image");
     const currentWidth = mapImage.offsetWidth;
     const currentHeight = mapImage.offsetHeight;
     const newWidth = currentWidth * zoomFactor;
     const newHeight = currentHeight * zoomFactor;
     setImageSize({ width: newWidth, height: newHeight });
-    mapImage.style.transformOrigin = '0 0'; // set transform origin to top-left corner
+    mapImage.style.transformOrigin = "0 0";
     mapImage.style.transform = `scale(${zoomFactor})`;
   };
 
@@ -60,46 +63,51 @@ const MapDisplay = ({ robot_id, paths, robotXPos, robotYPos, robotYaw }) => {
           </div>
         ) : (
           <>
-            <canvas
-              ref={canvasRef}
-              width={mapData.info.width} // Örneğin, API'den gelen veriye göre genişlik ve yüksekliği ayarlayın
-              height={mapData.info.height}
-              onClick={handleImageClick}
-              onMouseMove={handleMouseMove}
-              onLoad={handleImageLoad}
-              onWheel={handleWheel}
-              className="map-image"
-            />
-            <div className="mouse-info">
-              <p>
-                Fare Konumu: X: {((mousePosition.x - 10) / 20).toFixed(5)}, Y:{" "}
-                {((mousePosition.y + 10) / -20).toFixed(5)}
-              </p>
+            <div style={{}}>
+              <div className="">
+                <p>
+                  Fare Konumu: X: {((mousePosition.x - 10) / 20).toFixed(5)}, Y:{" "}
+                  {((mousePosition.y + 10) / -20).toFixed(5)}, {mousePosition.x}
+                </p>
+              </div>
+              <div>
+                <canvas
+                  ref={canvasRef}
+                  height={mapData.info.height}
+                  width={mapData.info.width}
+                  onClick={handleImageClick}
+                  onMouseMove={handleMouseMove}
+                  onLoad={handleImageLoad}
+                  onWheel={handleWheel}
+                  className="map-image"
+                />
+              </div>
+
+              <button
+                onClick={() => setIsAddingNode(!isAddingNode)}
+                className={`point-icon btn hover-up ${isAddingNode ? "active-mode" : ""}`}
+              >
+                <img
+                  src="/assets/imgs/point-icon.png"
+                  alt="Point Icon"
+                />
+              </button>
             </div>
-            <button
-              onClick={() => setIsAddingNode(!isAddingNode)}
-              className={`point-icon btn ${isAddingNode ? "active-mode" : ""}`}
-            >
-              <img
-                src="/assets/imgs/point-icon.png"
-                alt="Point Icon"
-              />
-            </button>
             <div>
               <img
                 className="robot-marker"
                 style={{
-                  left: `${imageSize.width / 2 + (0.3 + robotXPos) * 20}px`,
-                  top: `${imageSize.height / 2 + (-0.3 + robotYPos) * -20}px`,
-                  transform: `rotate(${robotYaw * (180 / Math.PI)}deg)`,
+                  left: `${imageSize.width / 2 + (0.3 + robotXPos) * zoomFactor * 20}px`,
+                  top: `${imageSize.height / 2 + (-0.3 + robotYPos) * zoomFactor * -20}px`,
+                  transform: `rotate(${robotYaw * (180 / Math.PI)}deg) scale(${zoomFactor})`,
                 }}
                 src="/assets/imgs/onder.png"
               ></img>
             </div>
             {paths.map((path, index) => {
               const color = nodeColors[index % nodeColors.length];
-              const xPos = imageSize.width / 2 + parseFloat(path.x_position);
-              const yPos = imageSize.height / 2 + parseFloat(path.y_position);
+              const xPos = imageSize.width / 2 + parseFloat(path.x_position) * (zoomFactor * 20) + zoomFactor * 10;
+              const yPos = imageSize.height / 2 + parseFloat(path.y_position -0.3*zoomFactor) * (zoomFactor * -20);
               return (
                 <div
                   key={path.node_id}
@@ -109,9 +117,8 @@ const MapDisplay = ({ robot_id, paths, robotXPos, robotYPos, robotYaw }) => {
                     left: `${xPos}px`,
                     backgroundColor: color,
                   }}
-                  title={`Nokta ${index + 1}: X: ${((mousePosition.x - 10) / 20).toFixed(5)} - Y: ${(
-                    (mousePosition.y + 10) /
-                    -20
+                  title={`Nokta ${index + 1}: X: ${parseFloat(path.x_position).toFixed(5)} - Y: ${parseFloat(
+                    path.y_position
                   ).toFixed(5)}`}
                 />
               );
@@ -119,6 +126,15 @@ const MapDisplay = ({ robot_id, paths, robotXPos, robotYPos, robotYaw }) => {
           </>
         )}
       </div>
+
+      {zoomFactor > 1 && (
+        <div
+          style={{
+            width: `${mapData.info.width * (zoomFactor - 1)}px`,
+            height: `${mapData.info.height * (zoomFactor - 1)}px`,
+          }}
+        ></div>
+      )}
     </div>
   );
 };
