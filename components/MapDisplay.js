@@ -18,18 +18,24 @@ const MapDisplay = ({ robot_id, paths, robotXPos, robotYPos, robotYaw }) => {
 
   const [zoomFactor, setZoomFactor] = useState(1);
 
-  const handleWheel = (event) => {
-    const { deltaY } = event;
-    const zoomFactor = deltaY > 1 ? 1 : 2.25;
-    setZoomFactor(zoomFactor);
+  const applyZoom = (newZoomFactor) => {
+    setZoomFactor(newZoomFactor);
     const mapImage = document.querySelector(".map-image");
     const currentWidth = mapImage.offsetWidth;
     const currentHeight = mapImage.offsetHeight;
-    const newWidth = currentWidth * zoomFactor;
-    const newHeight = currentHeight * zoomFactor;
+    const newWidth = currentWidth * newZoomFactor;
+    const newHeight = currentHeight * newZoomFactor;
     setImageSize({ width: newWidth, height: newHeight });
     mapImage.style.transformOrigin = "0 0";
-    mapImage.style.transform = `scale(${zoomFactor})`;
+    mapImage.style.transform = `scale(${newZoomFactor})`;
+  };
+
+  const handleZoomIn = () => {
+    applyZoom(Math.min(zoomFactor + 0.25, 2.5));
+  };
+
+  const handleZoomOut = () => {
+    applyZoom(Math.max(zoomFactor - 0.25, 1));
   };
 
   useEffect(() => {
@@ -66,8 +72,7 @@ const MapDisplay = ({ robot_id, paths, robotXPos, robotYPos, robotYaw }) => {
             <div style={{}}>
               <div className="">
                 <p>
-                  Fare Konumu: X: {((mousePosition.x - 10) / 20).toFixed(5)}, Y:{" "}
-                  {((mousePosition.y + 10) / -20).toFixed(5)}, {mousePosition.x}
+                  Fare Konumu: X: {((mousePosition.x - 10) / 20).toFixed(5)}, Y: {((mousePosition.y + 10) / -20).toFixed(5)}
                 </p>
               </div>
               <div>
@@ -78,7 +83,6 @@ const MapDisplay = ({ robot_id, paths, robotXPos, robotYPos, robotYaw }) => {
                   onClick={handleImageClick}
                   onMouseMove={handleMouseMove}
                   onLoad={handleImageLoad}
-                  onWheel={handleWheel}
                   className="map-image"
                 />
               </div>
@@ -92,13 +96,27 @@ const MapDisplay = ({ robot_id, paths, robotXPos, robotYPos, robotYaw }) => {
                   alt="Point Icon"
                 />
               </button>
+              <button
+                className="btn zoom-btn fw-bold hover-up"
+                style={{ top: "52px" }}
+                onClick={handleZoomIn}
+              >
+                +
+              </button>
+              <button
+                className="btn zoom-btn fw-bold hover-up"
+                style={{ top: "80px" }}
+                onClick={handleZoomOut}
+              >
+                -
+              </button>
             </div>
             <div>
               <img
                 className="robot-marker"
                 style={{
-                  left: `${imageSize.width / 2 + (0.3 + robotXPos) * zoomFactor * 20}px`,
-                  top: `${imageSize.height / 2 + (-0.3 + robotYPos) * zoomFactor * -20}px`,
+                  left: `${imageSize.width / 2 + parseFloat(robotXPos * 20 * zoomFactor + 5 * zoomFactor)}px`,
+                  top: `${imageSize.height / 2 - parseFloat(robotYPos * 20 * zoomFactor - (zoomFactor * 20) / zoomFactor)}px`,
                   transform: `rotate(${robotYaw * (180 / Math.PI)}deg) scale(${zoomFactor})`,
                 }}
                 src="/assets/imgs/onder.png"
@@ -106,8 +124,8 @@ const MapDisplay = ({ robot_id, paths, robotXPos, robotYPos, robotYaw }) => {
             </div>
             {paths.map((path, index) => {
               const color = nodeColors[index % nodeColors.length];
-              const xPos = imageSize.width / 2 + parseFloat(path.x_position) * (zoomFactor * 20) + zoomFactor * 10;
-              const yPos = imageSize.height / 2 + parseFloat(path.y_position -0.3*zoomFactor) * (zoomFactor * -20);
+              const xPos = imageSize.width / 2 + parseFloat(path.x_position * 20 * zoomFactor + 10 * zoomFactor);
+              const yPos = imageSize.height / 2 - parseFloat(path.y_position * 20 * zoomFactor - 10 / zoomFactor);
               return (
                 <div
                   key={path.node_id}
@@ -117,9 +135,7 @@ const MapDisplay = ({ robot_id, paths, robotXPos, robotYPos, robotYaw }) => {
                     left: `${xPos}px`,
                     backgroundColor: color,
                   }}
-                  title={`Nokta ${index + 1}: X: ${parseFloat(path.x_position).toFixed(5)} - Y: ${parseFloat(
-                    path.y_position
-                  ).toFixed(5)}`}
+                  title={`Nokta ${index + 1}: X: ${parseFloat(path.x_position).toFixed(5)} - Y: ${parseFloat(path.y_position).toFixed(5)}`}
                 />
               );
             })}

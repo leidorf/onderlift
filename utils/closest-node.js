@@ -1,4 +1,4 @@
-export function findEdgeNodes(nodes, robotXPos, robotYPos) {
+export function findClosestNode(nodes, robotXPos, robotYPos) {
   console.log("Nodes:", nodes);
   console.log("Robot Position:", { x: robotXPos, y: robotYPos });
 
@@ -13,16 +13,12 @@ export function findEdgeNodes(nodes, robotXPos, robotYPos) {
   nodes.forEach((node) => {
     const nodeX = parseFloat(node.x_position);
     const nodeY = parseFloat(node.y_position);
-    const distanceToRobot = Math.sqrt(
-      Math.pow(nodeX - robotCurrentPosition.x, 2) + Math.pow(nodeY - robotCurrentPosition.y, 2)
-    );
+    const distanceToRobot = Math.sqrt(Math.pow(nodeX - robotCurrentPosition.x, 2) + Math.pow(nodeY - robotCurrentPosition.y, 2));
 
     if (distanceToRobot < closestDistance) {
       closestDistance = distanceToRobot;
       closestNodeId = node.node_id;
     }
-
-
   });
 
   return {

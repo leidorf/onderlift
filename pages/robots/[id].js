@@ -12,7 +12,7 @@ import odomListener from "@/lib/odom";
 
 import { deletePath, deleteAllPaths } from "@/utils/handle-path";
 import { deleteRobot } from "@/utils/delete-robot";
-import { findEdgeNodes } from "@/utils/edge-nodes";
+import { dijkstra } from "@/utils/dijkstra";
 
 export default function Robot({ robots, paths }) {
   const router = useRouter();
@@ -24,10 +24,7 @@ export default function Robot({ robots, paths }) {
   const robotYPos = parseFloat(odomData.position.y);
   const robotYaw = odomData.orientation.yaw;
 
-  const handleFindNodes = () => {
-    const edgeNodes = findEdgeNodes(paths, robotXPos, robotYPos);
-    console.log("Start Node ID:", edgeNodes.startNodeId);
-  };
+  const [selectedNodeId, setSelectedNodeId] = useState(null);
 
   const onDeleteRobot = async () => {
     await deleteRobot(robots.id);
@@ -121,16 +118,12 @@ export default function Robot({ robots, paths }) {
                           <button
                             style={{ paddingLeft: "0px" }}
                             onClick={() => onDeletePath(path.node_id)}
-                            className={`text-${
-                              isDeletionEnabled ? "danger" : "muted"
-                            } btn btn-link text-decoration-none`}
+                            className={`text-${isDeletionEnabled ? "danger" : "muted"} btn btn-link text-decoration-none`}
                             disabled={!isDeletionEnabled}
                           >
-                            Nokta {index + 1}
+                            Nokta {index + 1}-{path.node_id}
                           </button>
-                          {(path.node_id)} 
-                           X: {Number(path.x_position).toFixed(3)}, Y:{" "}
-                          {Number(path.y_position).toFixed(3)}, Z: {Number(path.z_position).toFixed(3)}
+                          X: {Number(path.x_position).toFixed(3)}, Y: {Number(path.y_position).toFixed(3)}, Z: {Number(path.z_position).toFixed(3)}
                         </p>
                       </li>
                     ))}
@@ -138,11 +131,9 @@ export default function Robot({ robots, paths }) {
                   <br />
                   <div className="d-flex">
                     <button
-                      onClick={handleFindNodes}
-                      className={`btn ${
-                        paths.length !== 0 && odomData.position && odomData.position.x !== 0
-                          ? "btn-success"
-                          : "btn-outline-secondary disabled"
+/*                       onClick={dijkstra(paths, robotXPos, robotYPos, selectedNodeId)}
+ */                      className={`btn ${
+                        paths.length !== 0 && odomData.position && odomData.position.x !== 0 ? "btn-success" : "btn-outline-secondary disabled"
                       }`}
                     >
                       Görevi Başlat
@@ -160,7 +151,29 @@ export default function Robot({ robots, paths }) {
             </div>
             <p>Robot Kayıt Tarihi: {new Date(robots.creation).toLocaleString("tr-TR")}</p>
           </div>
-
+          <p>
+            Robota en yakın noktanın ID'si:
+          </p>
+          <div>
+            <h5>Hedef Nokta Seç:</h5>
+            <select
+              className="dropdown"
+              aria-label="Hedef Nokta Seç"
+              onChange={(e) => setSelectedNodeId(e.target.value)}
+              value={selectedNodeId || ""}
+            >
+              <option value="">Seçiniz...</option>
+              {paths.map((path) => (
+                <option
+                  key={path.node_id}
+                  value={path.node_id}
+                >
+                  Nokta-
+                  {path.node_id}
+                </option>
+              ))}
+            </select>
+          </div>
           <br />
           <div className="d-flex">
             <div className="me-auto">
@@ -169,15 +182,15 @@ export default function Robot({ robots, paths }) {
               </Link>
             </div>
             <div className="d-flex row row-cols-auto">
-              <div className="col">
+              {/*               <div className="col">
                 <button
                   className="btn btn-warning"
-                  /*                   onClick={onHandleUpdateMap}
-                   */
+                                    onClick={onHandleUpdateMap}
+                   
                 >
                   Haritayı Güncelle
                 </button>
-              </div>
+              </div>  */}
               <div className="col">
                 <button
                   className="btn btn-danger"
