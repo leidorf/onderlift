@@ -131,8 +131,11 @@ export default function Robot({ robots, paths }) {
                   <br />
                   <div className="d-flex">
                     <button
-/*                       onClick={dijkstra(paths, robotXPos, robotYPos, selectedNodeId)}
- */                      className={`btn ${
+                      onClick={() => {
+                        const path = dijkstra(paths, robotXPos, robotYPos, selectedNodeId);
+                        console.log(path);
+                      }}
+                      className={`btn ${
                         paths.length !== 0 && odomData.position && odomData.position.x !== 0 ? "btn-success" : "btn-outline-secondary disabled"
                       }`}
                     >
@@ -151,9 +154,7 @@ export default function Robot({ robots, paths }) {
             </div>
             <p>Robot Kayıt Tarihi: {new Date(robots.creation).toLocaleString("tr-TR")}</p>
           </div>
-          <p>
-            Robota en yakın noktanın ID'si:
-          </p>
+          <p>Robota en yakın noktanın ID'si:</p>
           <div>
             <h5>Hedef Nokta Seç:</h5>
             <select
