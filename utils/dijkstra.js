@@ -1,37 +1,34 @@
-// dijkstra.js
-import { findClosestNode } from "./closest-node";
 import { addNeighbors } from "./add-neighbors";
+import { calculateDistance } from "./calculate-distance";
 
 export function dijkstra(nodes, robotXPos, robotYPos, targetNodeId) {
-  // Add neighbors to nodes
-  addNeighbors(nodes, 1.0); // 1.0 is an example threshold distance
-
-  console.log("Nodes with neighbors:", nodes); // Düğümleri ve komşularını kontrol etmek için ekledik.
-
-  const closestNodeId = findClosestNode(nodes, robotXPos, robotYPos);
-  console.log("Closest Node ID:", closestNodeId);
-  console.log("Target Node ID:", targetNodeId);
+  addNeighbors(nodes);
 
   const distances = {};
   const previousNodes = {};
   const unvisitedNodes = new Set();
+  const robot = { x_position: robotXPos, y_position: robotYPos };
 
-  // Initialize distances and previousNodes
+  let robotStartNode = null;
+  let minRobotDistance = Infinity;
+
   nodes.forEach((node) => {
-    distances[node.node_id] = node.node_id === closestNodeId ? 0 : Infinity;
+    const distanceToRobot = calculateDistance(robot, node);
+    if (distanceToRobot < minRobotDistance) {
+      minRobotDistance = distanceToRobot;
+      robotStartNode = node.node_id;
+    }
+    distances[node.node_id] = Infinity;
     previousNodes[node.node_id] = null;
     unvisitedNodes.add(node.node_id);
   });
 
-  console.log("Initial distances:", distances);
-  console.log("Initial previous nodes:", previousNodes);
-  console.log("Initial unvisited nodes:", unvisitedNodes);
+  distances[robotStartNode] = 0;
 
   while (unvisitedNodes.size > 0) {
     let currentNode = null;
     let minDistance = Infinity;
 
-    // Find node with minimum distance
     unvisitedNodes.forEach((nodeId) => {
       if (distances[nodeId] < minDistance) {
         minDistance = distances[nodeId];
@@ -39,31 +36,29 @@ export function dijkstra(nodes, robotXPos, robotYPos, targetNodeId) {
       }
     });
 
-    console.log("Current node:", currentNode);
-
     if (currentNode === null) {
-      break; // No reachable nodes left
+      break;
     }
 
     unvisitedNodes.delete(currentNode);
 
-    // Explore neighbors of currentNode
     const currentNodeData = nodes.find((node) => node.node_id === currentNode);
     if (currentNodeData && currentNodeData.neighbors) {
-      currentNodeData.neighbors.forEach((neighborId) => {
-        const neighborNode = nodes.find((node) => node.node_id === neighborId);
-        const distanceToNeighbor = calculateDistance(currentNodeData, neighborNode);
-        console.log("Exploring neighbor:", neighborNode, "with ID:", neighborId);
+      currentNodeData.neighbors.forEach((neighbor) => {
+        const neighborNode = nodes.find((node) => node.node_id === neighbor.id);
 
-        if (distances[currentNode] + distanceToNeighbor < distances[neighborId]) {
-          distances[neighborId] = distances[currentNode] + distanceToNeighbor;
-          previousNodes[neighborId] = currentNode;
+        if (neighborNode) {
+          const distanceToNeighbor = neighbor.distance;
+
+          if (distances[currentNode] + distanceToNeighbor < distances[neighbor.id]) {
+            distances[neighbor.id] = distances[currentNode] + distanceToNeighbor;
+            previousNodes[neighbor.id] = currentNode;
+          }
         }
       });
     }
   }
 
-  // Build path from closestNode to targetNode
   const path = [];
   let currentNode = targetNodeId;
 
@@ -72,14 +67,5 @@ export function dijkstra(nodes, robotXPos, robotYPos, targetNodeId) {
     currentNode = previousNodes[currentNode];
   }
 
-  console.log("Path found:", path);
-
-  return path.length > 1 ? path : null; // Return path or null if no path found
-}
-
-// Helper function to calculate distance between two nodes
-function calculateDistance(node1, node2) {
-  const dx = parseFloat(node2.x_position) - parseFloat(node1.x_position);
-  const dy = parseFloat(node2.y_position) - parseFloat(node1.y_position);
-  return Math.sqrt(dx * dx + dy * dy);
+  return path.length >= 1 ? path : null;
 }

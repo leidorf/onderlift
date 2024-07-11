@@ -2,7 +2,7 @@ import useMapData from "@/utils/use-map-data";
 import { nodeColors } from "@/utils/node-colors";
 import React, { useEffect, useState } from "react";
 
-const MapDisplay = ({ robot_id, paths, robotXPos, robotYPos, robotYaw }) => {
+const MapDisplay = ({ paths, robot }) => {
   const {
     mapData,
     canvasRef,
@@ -14,7 +14,7 @@ const MapDisplay = ({ robot_id, paths, robotXPos, robotYPos, robotYaw }) => {
     mousePosition,
     imageSize,
     setImageSize,
-  } = useMapData(robot_id);
+  } = useMapData(robot.id);
 
   const [zoomFactor, setZoomFactor] = useState(1);
 
@@ -115,9 +115,9 @@ const MapDisplay = ({ robot_id, paths, robotXPos, robotYPos, robotYaw }) => {
               <img
                 className="robot-marker"
                 style={{
-                  left: `${imageSize.width / 2 + parseFloat(robotXPos * 20 * zoomFactor + 5 * zoomFactor)}px`,
-                  top: `${imageSize.height / 2 - parseFloat(robotYPos * 20 * zoomFactor - (zoomFactor * 20) / zoomFactor)}px`,
-                  transform: `rotate(${robotYaw * (180 / Math.PI)}deg) scale(${zoomFactor})`,
+                  left: `${imageSize.width / 2 + parseFloat(robot.x_position * 20 * zoomFactor + 5 * zoomFactor)}px`,
+                  top: `${imageSize.height / 2 - parseFloat(robot.y_position * 20 * zoomFactor - (zoomFactor * 20) / zoomFactor)}px`,
+                  transform: `rotate(${robot.yaw * (180 / Math.PI)}deg) scale(${zoomFactor})`,
                 }}
                 src="/assets/imgs/onder.png"
               ></img>

@@ -15,16 +15,23 @@ import { deleteRobot } from "@/utils/delete-robot";
 import { dijkstra } from "@/utils/dijkstra";
 
 export default function Robot({ robots, paths }) {
-  const router = useRouter();
-  const odomData = odomListener();
+  const router = useRouter(),
+    odomData = odomListener();
 
-  const [isDeletionEnabled, setIsDeletionEnabled] = useState(false);
+  const [isDeletionEnabled, setIsDeletionEnabled] = useState(false),
+    [pathOutput, setPathOutput] = useState(""),
+    [selectedNodeId, setSelectedNodeId] = useState(null);
 
-  const robotXPos = parseFloat(odomData.position.x);
-  const robotYPos = parseFloat(odomData.position.y);
-  const robotYaw = odomData.orientation.yaw;
+  const robotXPos = parseFloat(odomData.position.x),
+    robotYPos = parseFloat(odomData.position.y),
+    robotYaw = parseFloat(odomData.orientation.yaw);
 
-  const [selectedNodeId, setSelectedNodeId] = useState(null);
+  const robot = { id: robots.robot_id, x_position: robotXPos, y_position: robotYPos, yaw: robotYaw };
+
+  const handlePathButton = () => {
+    const path = dijkstra(paths, robotXPos, robotYPos, Number(selectedNodeId));
+    setPathOutput(`Robotun Yolu: ${path.join(" -> ")}`);
+  };
 
   const onDeleteRobot = async () => {
     await deleteRobot(robots.id);
@@ -53,14 +60,16 @@ export default function Robot({ robots, paths }) {
       <Layout>
         <PageHead headTitle={`Robot ${robots.id}`} />
         <div className="container h6">
-          <div>
-            <h4>
-              Robot ID: {robots.id}({robots.ip_address})
-            </h4>
-            <RosConnection />
-            <br />
-            <div>
-              <div className="row">
+          <div className="mb-5">
+            <div className="mb-3">
+              <h4>
+                Robot ID: {robots.id}({robots.ip_address})
+              </h4>
+              <RosConnection />
+              <p>Robot Kayıt Tarihi: {new Date(robots.creation).toLocaleString("tr-TR")}</p>
+            </div>
+            <div className="mb-3">
+              <div className="row mb-3">
                 <div className="col-3 bg-light fw-bold">X Pozisyonu</div>
                 <div className="col-3 bg-light fw-bold">Y Pozisyonu</div>
                 <div className="col-3 bg-light fw-bold">Z Pozisyonu</div>
@@ -69,7 +78,6 @@ export default function Robot({ robots, paths }) {
                 <div className="col-3">{odomData.position.y}</div>
                 <div className="col-3">{odomData.position.z}</div>
               </div>
-              <br />
               <div className="row">
                 <div className="col-3 bg-light fw-bold">Yaw</div>
                 <div className="col-3 bg-light fw-bold">Roll</div>
@@ -80,15 +88,11 @@ export default function Robot({ robots, paths }) {
                 <div className="col-3">{odomData.orientation.pitch}</div>
               </div>
             </div>
-            <br />
             <div className="row row-col-auto">
               <div className="col">
                 <MapDisplay
-                  robot_id={robots.id}
                   paths={paths}
-                  robotXPos={robotXPos}
-                  robotYPos={robotYPos}
-                  robotYaw={robotYaw}
+                  robot={robot}
                 />
               </div>
 
@@ -108,10 +112,9 @@ export default function Robot({ robots, paths }) {
                     Nokta silme modu
                   </label>
                 </div>
-                <p className="fw-lighter">(Silmek istediğiniz noktanın üzerine tıklayın.)</p>
-                <br />
-                <div>
-                  <ul>
+                <p className="fw-lighter mb-3">(Silmek istediğiniz noktanın üzerine tıklayın.)</p>
+                <div className="mb-4">
+                  <ul className="mb-3">
                     {paths.map((path, index) => (
                       <li key={path.node_id}>
                         <p className="text-wrap">
@@ -128,54 +131,54 @@ export default function Robot({ robots, paths }) {
                       </li>
                     ))}
                   </ul>
-                  <br />
-                  <div className="d-flex">
-                    <button
-                      onClick={() => {
-                        const path = dijkstra(paths, robotXPos, robotYPos, selectedNodeId);
-                        console.log(path);
-                      }}
-                      className={`btn ${
-                        paths.length !== 0 && odomData.position && odomData.position.x !== 0 ? "btn-success" : "btn-outline-secondary disabled"
-                      }`}
-                    >
-                      Görevi Başlat
-                    </button>
+                  <div className="d-flex justify-content-end">
                     <button
                       onClick={onDeleteAllPaths}
-                      className={`btn ms-auto ${isDeletionEnabled ? "btn-outline-danger" : "btn-outline-secondary"}`}
+                      className={`btn ${isDeletionEnabled ? "btn-outline-danger" : "btn-outline-secondary"}`}
                       disabled={!isDeletionEnabled}
                     >
                       Hepsini Sil
                     </button>
                   </div>
                 </div>
+                <div>
+                  <h5>Varış Noktası:</h5>
+                  <div className="d-flex mb-3">
+                    <div className="me-auto">
+                      <select
+                        className="form-select"
+                        aria-label="Hedef Nokta Seç"
+                        onChange={(e) => setSelectedNodeId(e.target.value)}
+                        value={selectedNodeId || ""}
+                      >
+                        <option value="">Seçiniz...</option>
+                        {paths.map((path) => (
+                          <option
+                            key={path.node_id}
+                            value={path.node_id}
+                          >
+                            Nokta-
+                            {path.node_id}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <button
+                        onClick={handlePathButton}
+                        className={`btn col ${
+                          paths.length !== 0 && selectedNodeId && odomData.position.x !== 0 ? "btn-success" : "btn-outline-secondary disabled"
+                        }`}
+                      >
+                        Görevi Başlat
+                      </button>
+                    </div>
+                  </div>
+                  <p>{pathOutput}</p>
+                </div>
               </div>
             </div>
-            <p>Robot Kayıt Tarihi: {new Date(robots.creation).toLocaleString("tr-TR")}</p>
           </div>
-          <p>Robota en yakın noktanın ID'si:</p>
-          <div>
-            <h5>Hedef Nokta Seç:</h5>
-            <select
-              className="dropdown"
-              aria-label="Hedef Nokta Seç"
-              onChange={(e) => setSelectedNodeId(e.target.value)}
-              value={selectedNodeId || ""}
-            >
-              <option value="">Seçiniz...</option>
-              {paths.map((path) => (
-                <option
-                  key={path.node_id}
-                  value={path.node_id}
-                >
-                  Nokta-
-                  {path.node_id}
-                </option>
-              ))}
-            </select>
-          </div>
-          <br />
           <div className="d-flex">
             <div className="me-auto">
               <Link href={`/`}>

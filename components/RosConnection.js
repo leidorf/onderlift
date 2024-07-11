@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import ros from "@/lib/ros"; // Adjust the path as necessary
+import ros from "@/lib/ros";
 
 export default function RosConnection() {
   const [isConnected, setIsConnected] = useState(false);
@@ -22,24 +22,14 @@ export default function RosConnection() {
     ros.on("connection", handleConnection);
     ros.on("close", handleClose);
 
-    const connectRos = async () => {
-      try {
-        await ros.customConnect(); // Assuming customConnect() is a function in ros.js
-      } catch (error) {
-        if (isMounted) {
-          setIsConnected(false);
-        }
-        console.error(error);
-      }
-    };
-
-    connectRos();
+    if (ros.isConnected) {
+      handleConnection();
+    }
 
     return () => {
       isMounted = false;
       ros.off("connection", handleConnection);
       ros.off("close", handleClose);
-      // Note: Do not call ros.close() here to avoid closing the connection on unmount
     };
   }, []);
 
@@ -56,6 +46,4 @@ export default function RosConnection() {
       </p>
     </div>
   );
-
-  
 }
