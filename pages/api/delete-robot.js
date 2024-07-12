@@ -1,18 +1,16 @@
 import pool from '../../server/db';
 
 export default async function handler(req, res) {
-  const { id } = req.query;
+  const { robot_id } = req.query;
 
-  if (!id) {
+  if (!robot_id) {
     return res.status(400).json({ success: false, error: 'Robot ID belirtilmeli' });
   }
 
   try {
-    // Robotu veritabanından sil
-    await pool.query('DELETE FROM path WHERE robot_id = ?', [id]); // Path tablosundaki kayıtları sil
+    await pool.query('DELETE FROM waypoints WHERE robot_id = ?', [id]);
 
-    // Şimdi robotu sil
-    await pool.query('DELETE FROM robots WHERE id = ?', [id]);
+    await pool.query('DELETE FROM robots WHERE robot_id = ?', [id]);
 
     res.status(200).json({ success: true, message: 'Robot başarıyla silindi' });
   } catch (error) {

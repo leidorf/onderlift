@@ -2,25 +2,25 @@ import pool from "../../server/db";
 
 export default async function handler(req, res) {
   if (req.method === "POST") {
-    const { robot_id, x_position, y_position, z_position } = req.body;
+    const { robot_id, x_coordinate, y_coordinate, z_coordinate } = req.body;
 
     if (
       !robot_id ||
-      typeof x_position !== "number" ||
-      typeof y_position !== "number" ||
-      typeof z_position !== "number"
+      typeof x_coordinate !== "number" ||
+      typeof y_coordinate !== "number" ||
+      typeof z_coordinate !== "number"
     ) {
       return res.status(400).json({ success: false, message: "Eksik bilgi" });
     }
 
     try {
       const query =
-        "INSERT INTO path (robot_id, x_position, y_position, z_position) VALUES (?, ?, ?, ?)";
+        "INSERT INTO waypoints (robot_id, x_coordinate, y_coordinate, z_coordinate) VALUES (?, ?, ?, ?)";
       const [] = await pool.query(query, [
         robot_id,
-        x_position,
-        y_position,
-        z_position,
+        x_coordinate,
+        y_coordinate,
+        z_coordinate,
       ]);
 
       res.status(200).json({ success: true, message: "Yol başarıyla eklendi" });

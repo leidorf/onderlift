@@ -15,15 +15,15 @@ export default function HomePage({ robots }) {
             <div className="me-auto">
               <ul>
                 {robots.map((robot) => (
-                  <li key={robot.id}>
+                  <li key={robot.robot_id}>
                     <div>
                       <h5 className="text-decoration-underline">
-                        <Link href={`/robots/${robot.id}`}>Robot ID: {robot.id}</Link>
+                        <Link href={`/robots/${robot.robot_id}`}>Robot ID: {robot.robot_id}</Link>
                       </h5>
                       <RosConnection />
                       IP Adresi: {robot.ip_address}
                       <br />
-                      <p>Oluşturulma Tarihi: {new Date(robot.creation).toLocaleString("tr-TR")}</p>
+                      <p>Oluşturulma Tarihi: {new Date(robot.created_at).toLocaleString("tr-TR")}</p>
                     </div>
                     <br />
                   </li>

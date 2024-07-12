@@ -1,13 +1,12 @@
 import { addNeighbors } from "./add-neighbors";
 import { calculateDistance } from "./calculate-distance";
 
-export function dijkstra(nodes, robotXPos, robotYPos, targetNodeId) {
+export function dijkstra(nodes, robot, targetNodeId) {
   addNeighbors(nodes);
 
   const distances = {};
   const previousNodes = {};
   const unvisitedNodes = new Set();
-  const robot = { x_position: robotXPos, y_position: robotYPos };
 
   let robotStartNode = null;
   let minRobotDistance = Infinity;
@@ -16,11 +15,11 @@ export function dijkstra(nodes, robotXPos, robotYPos, targetNodeId) {
     const distanceToRobot = calculateDistance(robot, node);
     if (distanceToRobot < minRobotDistance) {
       minRobotDistance = distanceToRobot;
-      robotStartNode = node.node_id;
+      robotStartNode = node.waypoint_id;
     }
-    distances[node.node_id] = Infinity;
-    previousNodes[node.node_id] = null;
-    unvisitedNodes.add(node.node_id);
+    distances[node.waypoint_id] = Infinity;
+    previousNodes[node.waypoint_id] = null;
+    unvisitedNodes.add(node.waypoint_id);
   });
 
   distances[robotStartNode] = 0;
@@ -42,10 +41,10 @@ export function dijkstra(nodes, robotXPos, robotYPos, targetNodeId) {
 
     unvisitedNodes.delete(currentNode);
 
-    const currentNodeData = nodes.find((node) => node.node_id === currentNode);
+    const currentNodeData = nodes.find((node) => node.waypoint_id === currentNode);
     if (currentNodeData && currentNodeData.neighbors) {
       currentNodeData.neighbors.forEach((neighbor) => {
-        const neighborNode = nodes.find((node) => node.node_id === neighbor.id);
+        const neighborNode = nodes.find((node) => node.waypoint_id === neighbor.id);
 
         if (neighborNode) {
           const distanceToNeighbor = neighbor.distance;

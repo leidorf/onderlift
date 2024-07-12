@@ -5,7 +5,7 @@ export default async function handler(req, res) {
 
   if (req.method === 'GET') {
     try {
-      const [rows] = await pool.query('SELECT * FROM robots WHERE id = ?', [id]);
+      const [rows] = await pool.query('SELECT * FROM robots WHERE robot_id = ?', [id]);
       if (rows.length === 0) {
         return res.status(404).json({ success: false, error: 'Robot bulunamadı' });
       }

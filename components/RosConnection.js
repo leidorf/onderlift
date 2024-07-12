@@ -38,7 +38,7 @@ export default function RosConnection() {
       <p>
         ROS Bağlantı Durumu:
         <span
-          style={{ color: isConnected ? "green" : "red" }}
+          style={{ color: isConnected ? "green" : "#BE1522" }}
           className="fw-bolder"
         >
           {isConnected ? " Bağlandı" : " Bağlanmadı"}

@@ -1,6 +1,6 @@
-export function calculateDistance(node1, node2) {
-    const dx = parseFloat(node2.x_position) - parseFloat(node1.x_position);
-    const dy = parseFloat(node2.y_position) - parseFloat(node1.y_position);
+export function calculateDistance(waypoint1, waypoint2) {
+    const dx = parseFloat(waypoint2.x_coordinate) - parseFloat(waypoint1.x_coordinate);
+    const dy = parseFloat(waypoint2.y_coordinate) - parseFloat(waypoint1.y_coordinate);
     return Math.sqrt(dx * dx + dy * dy);
   }
   

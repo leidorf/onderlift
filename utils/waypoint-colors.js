@@ -1,4 +1,4 @@
-export const nodeColors = [
+export const waypointColors = [
   "red",
   "blue",
   "green",

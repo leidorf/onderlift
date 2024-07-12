@@ -10,43 +10,51 @@ import RosConnection from "@/components/RosConnection";
 import MapDisplay from "@/components/MapDisplay";
 import odomListener from "@/lib/odom";
 
-import { deletePath, deleteAllPaths } from "@/utils/handle-path";
+import { deleteWaypoint, deleteAllWaypoints } from "@/utils/handle-waypoint";
 import { deleteRobot } from "@/utils/delete-robot";
 import { dijkstra } from "@/utils/dijkstra";
+import { addTask } from "@/utils/handle-task";
 
-export default function Robot({ robots, paths }) {
+export default function Robot({ robots, waypoints, tasks }) {
   const router = useRouter(),
     odomData = odomListener();
 
   const [isDeletionEnabled, setIsDeletionEnabled] = useState(false),
-    [pathOutput, setPathOutput] = useState(""),
-    [selectedNodeId, setSelectedNodeId] = useState(null);
+    [dijkstraResult, setDijkstraResult] = useState([]),
+    [targetWaypointId, setTargetWaypointId] = useState(null);
 
-  const robotXPos = parseFloat(odomData.position.x),
-    robotYPos = parseFloat(odomData.position.y),
-    robotYaw = parseFloat(odomData.orientation.yaw);
+  const robot = {
+    id: robots.robot_id,
+    x_coordinate: parseFloat(odomData.position.x),
+    y_coordinate: parseFloat(odomData.position.y),
+    z_coordinate: parseFloat(odomData.position.z),
+    yaw: parseFloat(odomData.orientation.yaw),
+    roll: parseFloat(odomData.orientation.roll),
+    pitch: parseFloat(odomData.orientation.pitch),
+  };
 
-  const robot = { id: robots.robot_id, x_position: robotXPos, y_position: robotYPos, yaw: robotYaw };
+  const showShortestPath = async () => {
+    setDijkstraResult(dijkstra(waypoints, robot, Number(targetWaypointId)));
+  };
 
-  const handlePathButton = () => {
-    const path = dijkstra(paths, robotXPos, robotYPos, Number(selectedNodeId));
-    setPathOutput(`Robotun Yolu: ${path.join(" -> ")}`);
+  const onAddTask = async () => {
+    await addTask(robots.robot_id, dijkstraResult);
   };
 
   const onDeleteRobot = async () => {
-    await deleteRobot(robots.id);
+    await deleteRobot(robots.robot_id);
     router.push(`/`);
   };
 
-  const onDeletePath = async (node_id) => {
-    await deletePath(node_id);
+  const onDeleteWaypoint = async (waypoint_id) => {
+    await deleteWaypoint(waypoint_id);
     router.reload();
   };
 
-  const onDeleteAllPaths = async () => {
-    const confirmDeleteAllPaths = confirm("Tüm yollar silinsin mi?");
-    if (confirmDeleteAllPaths) {
-      await deleteAllPaths(paths);
+  const onDeleteAllWaypoints = async () => {
+    const confirmDeleteAllWaypoints = confirm("Tüm yollar silinsin mi?");
+    if (confirmDeleteAllWaypoints) {
+      await deleteAllWaypoints(waypoints);
       router.reload();
     }
   };
@@ -58,48 +66,46 @@ export default function Robot({ robots, paths }) {
   return (
     <>
       <Layout>
-        <PageHead headTitle={`Robot ${robots.id}`} />
+        <PageHead headTitle={`Robot ${robots.robot_id}`} />
         <div className="container h6">
           <div className="mb-5">
             <div className="mb-3">
               <h4>
-                Robot ID: {robots.id}({robots.ip_address})
+                Robot ID: {robots.robot_id}({robots.ip_address})
               </h4>
               <RosConnection />
-              <p>Robot Kayıt Tarihi: {new Date(robots.creation).toLocaleString("tr-TR")}</p>
+              <p>Robot Kayıt Tarihi: {new Date(robots.created_at).toLocaleString("tr-TR")}</p>
             </div>
-            <div className="mb-3">
-              <div className="row mb-3">
-                <div className="col-3 bg-light fw-bold">X Pozisyonu</div>
-                <div className="col-3 bg-light fw-bold">Y Pozisyonu</div>
-                <div className="col-3 bg-light fw-bold">Z Pozisyonu</div>
-                <div className="w-100"></div>
-                <div className="col-3">{odomData.position.x}</div>
-                <div className="col-3">{odomData.position.y}</div>
-                <div className="col-3">{odomData.position.z}</div>
+            <div className="row">
+              <div className="mb-3 col">
+                <div className="row mb-3">
+                  <div className="col-4 bg-light fw-bold">X Pozisyonu</div>
+                  <div className="col-4 bg-light fw-bold">Y Pozisyonu</div>
+                  <div className="col-4 bg-light fw-bold">Z Pozisyonu</div>
+                  <div className="w-100"></div>
+                  <div className="col-4">{robot.x_coordinate}</div>
+                  <div className="col-4">{robot.y_coordinate}</div>
+                  <div className="col-4">{robot.z_coordinate}</div>
+                </div>
+                <div className="row mb-3">
+                  <div className="col-4 bg-light fw-bold">Yaw</div>
+                  <div className="col-4 bg-light fw-bold">Roll</div>
+                  <div className="col-4 bg-light fw-bold">Pitch</div>
+                  <div className="w-100"></div>
+                  <div className="col-4">{robot.yaw}</div>
+                  <div className="col-4">{robot.roll}</div>
+                  <div className="col-4">{robot.pitch}</div>
+                </div>
+                <div className="col">
+                  <MapDisplay
+                    waypoints={waypoints}
+                    robot={robot}
+                  />
+                </div>
               </div>
-              <div className="row">
-                <div className="col-3 bg-light fw-bold">Yaw</div>
-                <div className="col-3 bg-light fw-bold">Roll</div>
-                <div className="col-3 bg-light fw-bold">Pitch</div>
-                <div className="w-100"></div>
-                <div className="col-3">{odomData.orientation.yaw}</div>
-                <div className="col-3">{odomData.orientation.roll}</div>
-                <div className="col-3">{odomData.orientation.pitch}</div>
-              </div>
-            </div>
-            <div className="row row-col-auto">
-              <div className="col">
-                <MapDisplay
-                  paths={paths}
-                  robot={robot}
-                />
-              </div>
-
               <div className="col-3">
-                <br />
                 <div>
-                  <h5>Robotun Yolları:</h5>
+                  <h5>Hareket Noktaları:</h5>
                   <input
                     type="checkbox"
                     checked={isDeletionEnabled}
@@ -112,34 +118,36 @@ export default function Robot({ robots, paths }) {
                     Nokta silme modu
                   </label>
                 </div>
-                <p className="fw-lighter mb-3">(Silmek istediğiniz noktanın üzerine tıklayın.)</p>
-                <div className="mb-4">
+                <p className="fw-lighter">(Silmek istediğiniz noktanın üzerine tıklayın.)</p>
+                <div>
                   <ul className="mb-3">
-                    {paths.map((path, index) => (
-                      <li key={path.node_id}>
+                    {waypoints.map((waypoint, index) => (
+                      <li key={waypoint.waypoint_id}>
                         <p className="text-wrap">
                           <button
                             style={{ paddingLeft: "0px" }}
-                            onClick={() => onDeletePath(path.node_id)}
-                            className={`text-${isDeletionEnabled ? "danger" : "muted"} btn btn-link text-decoration-none`}
+                            onClick={() => onDeleteWaypoint(waypoint.waypoint_id)}
+                            className={`${isDeletionEnabled ? "text-danger" : "text-muted"} btn btn-link text-decoration-none`}
                             disabled={!isDeletionEnabled}
                           >
-                            Nokta {index + 1}-{path.node_id}
+                            Nokta {index + 1}-{waypoint.waypoint_id}
                           </button>
-                          X: {Number(path.x_position).toFixed(3)}, Y: {Number(path.y_position).toFixed(3)}, Z: {Number(path.z_position).toFixed(3)}
+                          X: {Number(waypoint.x_coordinate).toFixed(3)}, Y: {Number(waypoint.y_coordinate).toFixed(3)}, Z:{" "}
+                          {Number(waypoint.z_coordinate).toFixed(3)}
                         </p>
                       </li>
                     ))}
                   </ul>
                   <div className="d-flex justify-content-end">
                     <button
-                      onClick={onDeleteAllPaths}
+                      onClick={onDeleteAllWaypoints}
                       className={`btn ${isDeletionEnabled ? "btn-outline-danger" : "btn-outline-secondary"}`}
                       disabled={!isDeletionEnabled}
                     >
                       Hepsini Sil
                     </button>
                   </div>
+                  <hr />
                 </div>
                 <div>
                   <h5>Varış Noktası:</h5>
@@ -148,33 +156,58 @@ export default function Robot({ robots, paths }) {
                       <select
                         className="form-select"
                         aria-label="Hedef Nokta Seç"
-                        onChange={(e) => setSelectedNodeId(e.target.value)}
-                        value={selectedNodeId || ""}
+                        onChange={(e) => setTargetWaypointId(e.target.value)}
+                        value={targetWaypointId || ""}
                       >
                         <option value="">Seçiniz...</option>
-                        {paths.map((path) => (
+                        {waypoints.map((waypoint) => (
                           <option
-                            key={path.node_id}
-                            value={path.node_id}
+                            key={waypoint.waypoint_id}
+                            value={waypoint.waypoint_id}
                           >
                             Nokta-
-                            {path.node_id}
+                            {waypoint.waypoint_id}
                           </option>
                         ))}
                       </select>
                     </div>
                     <div>
                       <button
-                        onClick={handlePathButton}
+                        onClick={showShortestPath}
                         className={`btn col ${
-                          paths.length !== 0 && selectedNodeId && odomData.position.x !== 0 ? "btn-success" : "btn-outline-secondary disabled"
+                          waypoints.length !== 0 && targetWaypointId && robot.x_coordinate !== 0 ? "btn-success" : "btn-outline-secondary disabled"
                         }`}
                       >
-                        Görevi Başlat
+                        Yolu Göster
                       </button>
                     </div>
                   </div>
-                  <p>{pathOutput}</p>
+                  {dijkstraResult && (
+                    <>
+                      <p>Hedef nokta için bulunan en kısa yol:</p>
+                      <p
+                        className="mb-3 text-decoration-underline fw-bold text-primary"
+                        onClick={onAddTask}
+                        style={{ cursor: "pointer" }}
+                      >
+                        {dijkstraResult.join(" -> ")}
+                      </p>
+                    </>
+                  )}
+                  <div>
+                    <h5 className="mb-3">Robotun Görevi:</h5>
+                    <ul>
+                      {tasks.map((task) => (
+                        <li
+                          key={task.task_id}
+                          className="mb-3"
+                        >
+                          Görev ID: {task.task_id} | {task.waypoint_ids.split(",").join(" -> ")},
+                          <br /> Oluşturulma Tarihi: {new Date(task.created_at).toLocaleString()}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
               </div>
             </div>
@@ -186,15 +219,6 @@ export default function Robot({ robots, paths }) {
               </Link>
             </div>
             <div className="d-flex row row-cols-auto">
-              {/*               <div className="col">
-                <button
-                  className="btn btn-warning"
-                                    onClick={onHandleUpdateMap}
-                   
-                >
-                  Haritayı Güncelle
-                </button>
-              </div>  */}
               <div className="col">
                 <button
                   className="btn btn-danger"
@@ -215,8 +239,8 @@ export async function getStaticPaths() {
   const response = await axios.get("http://localhost:3000/api/robots");
   const robots = response.data;
 
-  const paths = robots.map((robots) => ({
-    params: { id: robots.id.toString() },
+  const paths = robots.map((robot) => ({
+    params: { id: robot.robot_id.toString() },
   }));
 
   return {
@@ -226,15 +250,17 @@ export async function getStaticPaths() {
 }
 
 export async function getStaticProps({ params }) {
-  const [robotRes, pathsRes] = await Promise.all([
+  const [robotRes, waypointRes, taskRes] = await Promise.all([
     axios.get(`http://localhost:3000/api/robots/${params.id}`),
-    axios.get(`http://localhost:3000/api/paths?robot_id=${params.id}`),
+    axios.get(`http://localhost:3000/api/waypoints?robot_id=${params.id}`),
+    axios.get(`http://localhost:3000/api/tasks?robot_id=${params.id}`),
   ]);
 
   return {
     props: {
       robots: robotRes.data,
-      paths: pathsRes.data,
+      waypoints: waypointRes.data,
+      tasks: taskRes.data,
     },
   };
 }

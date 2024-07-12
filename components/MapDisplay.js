@@ -1,16 +1,16 @@
 import useMapData from "@/utils/use-map-data";
-import { nodeColors } from "@/utils/node-colors";
+import { waypointColors } from "@/utils/waypoint-colors";
 import React, { useEffect, useState } from "react";
 
-const MapDisplay = ({ paths, robot }) => {
+const MapDisplay = ({ waypoints, robot }) => {
   const {
     mapData,
     canvasRef,
     handleMouseMove,
     handleImageClick,
     handleImageLoad,
-    isAddingNode,
-    setIsAddingNode,
+    isAddingWaypoint,
+    setIsAddingWaypoint,
     mousePosition,
     imageSize,
     setImageSize,
@@ -58,7 +58,7 @@ const MapDisplay = ({ paths, robot }) => {
 
   return (
     <div>
-      <p>Harita: {isAddingNode && <span> Nokta Ekleme Modu Aktif</span>}</p>
+      <p>Harita: {isAddingWaypoint && <span> Nokta Ekleme Modu Aktif</span>}</p>
       <div style={{ position: "relative" }}>
         {!mapData ? (
           <div
@@ -88,8 +88,8 @@ const MapDisplay = ({ paths, robot }) => {
               </div>
 
               <button
-                onClick={() => setIsAddingNode(!isAddingNode)}
-                className={`point-icon btn hover-up ${isAddingNode ? "active-mode" : ""}`}
+                onClick={() => setIsAddingWaypoint(!isAddingWaypoint)}
+                className={`point-icon btn hover-up ${isAddingWaypoint ? "active-mode" : ""}`}
               >
                 <img
                   src="/assets/imgs/point-icon.png"
@@ -115,27 +115,29 @@ const MapDisplay = ({ paths, robot }) => {
               <img
                 className="robot-marker"
                 style={{
-                  left: `${imageSize.width / 2 + parseFloat(robot.x_position * 20 * zoomFactor + 5 * zoomFactor)}px`,
-                  top: `${imageSize.height / 2 - parseFloat(robot.y_position * 20 * zoomFactor - (zoomFactor * 20) / zoomFactor)}px`,
+                  left: `${imageSize.width / 2 + parseFloat(robot.x_coordinate * 20 * zoomFactor + 5 * zoomFactor)}px`,
+                  top: `${imageSize.height / 2 - parseFloat(robot.y_coordinate * 20 * zoomFactor - (zoomFactor * 20) / zoomFactor)}px`,
                   transform: `rotate(${robot.yaw * (180 / Math.PI)}deg) scale(${zoomFactor})`,
                 }}
                 src="/assets/imgs/onder.png"
               ></img>
             </div>
-            {paths.map((path, index) => {
-              const color = nodeColors[index % nodeColors.length];
-              const xPos = imageSize.width / 2 + parseFloat(path.x_position * 20 * zoomFactor + 10 * zoomFactor);
-              const yPos = imageSize.height / 2 - parseFloat(path.y_position * 20 * zoomFactor - 10 / zoomFactor);
+            {waypoints.map((waypoint, index) => {
+              const color = waypointColors[index % waypointColors.length];
+              const xPos = imageSize.width / 2 + parseFloat(waypoint.x_coordinate * 20 * zoomFactor + 10 * zoomFactor);
+              const yPos = imageSize.height / 2 - parseFloat(waypoint.y_coordinate * 20 * zoomFactor - 10 / zoomFactor);
               return (
                 <div
-                  key={path.node_id}
-                  className="node"
+                  key={waypoint.waypoint_id}
+                  className="waypoint"
                   style={{
                     top: `${yPos}px`,
                     left: `${xPos}px`,
                     backgroundColor: color,
                   }}
-                  title={`Nokta ${index + 1}: X: ${parseFloat(path.x_position).toFixed(5)} - Y: ${parseFloat(path.y_position).toFixed(5)}`}
+                  title={`Nokta ${index + 1}: X: ${parseFloat(waypoint.x_coordinate).toFixed(5)} - Y: ${parseFloat(waypoint.y_coordinate).toFixed(
+                    5
+                  )}`}
                 />
               );
             })}

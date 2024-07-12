@@ -3,7 +3,7 @@ import pool from "../../server/db";
 
 export const config = {
   api: {
-    bodyParser: false, // FormData işleme için bodyParser devre dışı bırakılıyor
+    bodyParser: false, 
   },
 };
 
@@ -21,7 +21,7 @@ export default async function handler(req, res) {
 
       try {
         const query = `
-          INSERT INTO robots (ip_address, creation)
+          INSERT INTO robots (ip_address, created_at)
           VALUES (?, CURRENT_TIMESTAMP())
         `;
         const [result] = await pool.query(query, [ip_address]);

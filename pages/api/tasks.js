@@ -9,9 +9,9 @@ export default async function handler(req, res) {
     }
 
     try {
-      const query = 'SELECT * FROM path WHERE robot_id = ?';
-      const [paths] = await pool.query(query, [robot_id]);
-      res.status(200).json(paths);
+      const query = 'SELECT * FROM tasks WHERE robot_id = ?';
+      const [tasks] = await pool.query(query, [robot_id]);
+      res.status(200).json(tasks);
     } catch (error) {
       console.error('Veritabanı hatası:', error);
       res.status(500).json({ success: false, message: 'Veritabanı hatası' });

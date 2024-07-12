@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { mapTopic } from "@/lib/map";
-import { addPath } from "@/utils/handle-path";
+import { addWaypoint } from "@/utils/handle-waypoint";
 import { useRouter } from "next/router";
 
 const useMapData = (robotId) => {
@@ -8,7 +8,7 @@ const useMapData = (robotId) => {
   const canvasRef = useRef(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
-  const [isAddingNode, setIsAddingNode] = useState(false);
+  const [isAddingWaypoint, setIsAddingWaypoint] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -68,10 +68,10 @@ const useMapData = (robotId) => {
   };
   
   const handleImageClick = async () => {
-    if (isAddingNode) {
+    if (isAddingWaypoint) {
       const { x, y } = mousePosition;
-      await addPath(robotId, (Number(x)-10)/20, ((Number(y)+10)/-20), 0);
-      setIsAddingNode(!isAddingNode);
+      await addWaypoint(robotId, (Number(x)-10)/20, ((Number(y)+10)/-20), 0);
+      setIsAddingWaypoint(!isAddingWaypoint);
       router.reload();
     }
   };
@@ -91,11 +91,11 @@ const useMapData = (robotId) => {
     handleMouseMove,
     handleImageClick,
     handleImageLoad,
-    isAddingNode,
-    setIsAddingNode,
+    isAddingWaypoint,
+    setIsAddingWaypoint,
     mousePosition,
     imageSize,
-    setImageSize, // Ensure setImageSize is returned
+    setImageSize, 
   };
 };
 
