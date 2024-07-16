@@ -9,11 +9,12 @@ import PageHead from "@/components/layout/PageHead";
 import RosConnection from "@/components/RosConnection";
 import MapDisplay from "@/components/MapDisplay";
 import odomListener from "@/lib/odom";
+import { sendTaskToROS } from "@/lib/assign-task";
 
 import { deleteWaypoint, deleteAllWaypoints } from "@/utils/handle-waypoint";
 import { deleteRobot } from "@/utils/delete-robot";
 import { dijkstra } from "@/utils/dijkstra";
-import { addTask } from "@/utils/handle-task";
+import { addTask, deleteTask } from "@/utils/handle-task";
 
 export default function Robot({ robots, waypoints, tasks }) {
   const router = useRouter(),
@@ -39,6 +40,12 @@ export default function Robot({ robots, waypoints, tasks }) {
 
   const onAddTask = async () => {
     await addTask(robots.robot_id, dijkstraResult);
+    router.reload();
+  };
+
+  const onDeleteTask = async (task_id) => {
+    await deleteTask(task_id);
+    router.reload();
   };
 
   const onDeleteRobot = async () => {
@@ -185,6 +192,7 @@ export default function Robot({ robots, waypoints, tasks }) {
                   {dijkstraResult && (
                     <>
                       <p>Hedef nokta için bulunan en kısa yol:</p>
+                      <p className="fw-lighter text-nowrap">(Görevi kaydetmek için yolun üstüne tıklayın.)</p>
                       <p
                         className="mb-3 text-decoration-underline fw-bold text-primary"
                         onClick={onAddTask}
@@ -202,8 +210,24 @@ export default function Robot({ robots, waypoints, tasks }) {
                           key={task.task_id}
                           className="mb-3"
                         >
-                          Görev ID: {task.task_id} | {task.waypoint_ids.split(",").join(" -> ")},
-                          <br /> Oluşturulma Tarihi: {new Date(task.created_at).toLocaleString()}
+                          Görev ID: {task.task_id} ({new Date(task.created_at).toLocaleString("tr-TR")})
+                          <br />
+                          <div className="d-flex align-items-center hstack gap-1">
+                            {task.waypoint_ids.split(",").join(" -> ")}
+                            <button
+                              className="btn btn-sm btn-success ms-auto"
+                              /*                               onClick={() => handleSendTask(task.task_id)}
+                               */
+                            >
+                              ✔
+                            </button>
+                            <button
+                              className="btn btn-sm btn-danger"
+                              onClick={() => onDeleteTask(task.task_id)}
+                            >
+                              ✕
+                            </button>
+                          </div>
                         </li>
                       ))}
                     </ul>

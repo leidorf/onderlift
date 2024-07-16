@@ -8,9 +8,24 @@ export default async function handler(req, res) {
   }
 
   try {
+    // Find tasks containing the waypoint
+    const [tasks] = await pool.query(`
+      SELECT * FROM tasks WHERE FIND_IN_SET(?, waypoint_ids)
+    `, [waypoint_id]);
+
+    if (tasks.length > 0) {
+      const task_id = tasks[0].task_id;
+
+      // Delete the task
+      await pool.query(`
+        DELETE FROM tasks WHERE task_id = ?
+      `, [task_id]);
+    }
+
+    // Delete the waypoint
     await pool.query('DELETE FROM waypoints WHERE waypoint_id = ?', [waypoint_id]);
 
-    res.status(200).json({ success: true, message: 'Düğüm başarıyla silindi' });
+    res.status(200).json({ success: true, message: 'Düğüm ve ilişkili görev başarıyla silindi' });
   } catch (error) {
     console.error('Veritabanı hatası:', error);
     res.status(500).json({ success: false, error: 'Veritabanı hatası' });

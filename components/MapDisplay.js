@@ -86,7 +86,6 @@ const MapDisplay = ({ waypoints, robot }) => {
                   className="map-image"
                 />
               </div>
-
               <button
                 onClick={() => setIsAddingWaypoint(!isAddingWaypoint)}
                 className={`point-icon btn hover-up ${isAddingWaypoint ? "active-mode" : ""}`}
@@ -98,14 +97,14 @@ const MapDisplay = ({ waypoints, robot }) => {
               </button>
               <button
                 className="btn zoom-btn fw-bold hover-up"
-                style={{ top: "52px" }}
+                style={{ top: "54px" }}
                 onClick={handleZoomIn}
               >
                 +
               </button>
               <button
                 className="btn zoom-btn fw-bold hover-up"
-                style={{ top: "80px" }}
+                style={{ top: "81px" }}
                 onClick={handleZoomOut}
               >
                 -
