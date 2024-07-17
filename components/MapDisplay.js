@@ -72,7 +72,7 @@ const MapDisplay = ({ waypoints, robot }) => {
             <div style={{}}>
               <div className="">
                 <p>
-                  Fare Konumu: X: {((mousePosition.x - 10) / 20).toFixed(5)}, Y: {((mousePosition.y + 10) / -20).toFixed(5)}
+                  Fare Konumu: X: {mousePosition.x.toFixed(5)}, Y: {mousePosition.y.toFixed(5)}
                 </p>
               </div>
               <div>
@@ -96,15 +96,13 @@ const MapDisplay = ({ waypoints, robot }) => {
                 />
               </button>
               <button
-                className="btn zoom-btn fw-bold hover-up"
-                style={{ top: "54px" }}
+                className="btn zoom-btn zoom-in fw-bold hover-up"
                 onClick={handleZoomIn}
               >
                 +
               </button>
               <button
-                className="btn zoom-btn fw-bold hover-up"
-                style={{ top: "81px" }}
+                className="btn zoom-btn zoom-out fw-bold hover-up"
                 onClick={handleZoomOut}
               >
                 -
@@ -114,17 +112,17 @@ const MapDisplay = ({ waypoints, robot }) => {
               <img
                 className="robot-marker"
                 style={{
-                  left: `${imageSize.width / 2 + parseFloat(robot.x_coordinate * 20 * zoomFactor + 5 * zoomFactor)}px`,
-                  top: `${imageSize.height / 2 - parseFloat(robot.y_coordinate * 20 * zoomFactor - (zoomFactor * 20) / zoomFactor)}px`,
+                  left: `${parseFloat(imageSize.width / 2 + 8 + robot.x_coordinate * 20 * zoomFactor)}px`,
+                  top: `${parseFloat(imageSize.height / 2 + 24 - robot.y_coordinate * 20 * zoomFactor)}px`,
                   transform: `rotate(${robot.yaw * (180 / Math.PI)}deg) scale(${zoomFactor})`,
                 }}
-                src="/assets/imgs/onder.png"
+                src="/assets/imgs/robot-ico.png"
               ></img>
             </div>
             {waypoints.map((waypoint, index) => {
               const color = waypointColors[index % waypointColors.length];
-              const xPos = imageSize.width / 2 + parseFloat(waypoint.x_coordinate * 20 * zoomFactor + 10 * zoomFactor);
-              const yPos = imageSize.height / 2 - parseFloat(waypoint.y_coordinate * 20 * zoomFactor - 10 / zoomFactor);
+              const xPos = parseFloat(imageSize.width / 2 + 8 + Number(waypoint.x_coordinate) * 20 * zoomFactor);
+              const yPos = parseFloat(imageSize.height / 2 + 24 - Number(waypoint.y_coordinate) * 20 * zoomFactor);
               return (
                 <div
                   key={waypoint.waypoint_id}
@@ -134,7 +132,7 @@ const MapDisplay = ({ waypoints, robot }) => {
                     left: `${xPos}px`,
                     backgroundColor: color,
                   }}
-                  title={`Nokta ${index + 1}: X: ${parseFloat(waypoint.x_coordinate).toFixed(5)} - Y: ${parseFloat(waypoint.y_coordinate).toFixed(
+                  title={`Nokta ${waypoint.waypoint_id}: X: ${parseFloat(waypoint.x_coordinate).toFixed(5)} - Y: ${parseFloat(waypoint.y_coordinate).toFixed(
                     5
                   )}`}
                 />

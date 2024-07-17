@@ -31,3 +31,26 @@ export const deleteAllTasks = async (tasks) => {
     console.error("Tüm yolları silerken hatayla karşılaşıldı:", error);
   }
 };
+
+export const assingTask = async (task_id) => {
+  try {
+    const response = await fetch("/api/assign-task", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ task_id }),
+    });
+
+    if (response.ok) {
+      alert("Görev başarıyla ROS'a gönderildi.");
+    } else {
+      const errorData = await response.json();
+      alert(`Görev gönderilemedi: ${errorData.error}`);
+    }
+  } catch (error) {
+    console.error("Görev gönderilemedi:", error);
+    alert("Görev gönderilemedi.");
+  }
+};
+

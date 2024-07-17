@@ -13,7 +13,6 @@ const useMapData = (robotId) => {
 
   useEffect(() => {
     mapTopic.subscribe((message) => {
-      console.log("Received map data:", message);
       setMapData(message);
     });
 
@@ -63,14 +62,18 @@ const useMapData = (robotId) => {
       const y = ((event.clientY - rect.top) / rect.height) * canvas.height;
       const centerX = canvas.width / 2;
       const centerY = canvas.height / 2;
-      setMousePosition({ x: x - centerX, y: y - centerY });
+
+      const rosX = (x - centerX) / 20 - 0.4;
+      const rosY = (centerY - y) / 20 + 0.4;
+
+      setMousePosition({ x: rosX, y: rosY });
     }
   };
-  
+
   const handleImageClick = async () => {
     if (isAddingWaypoint) {
       const { x, y } = mousePosition;
-      await addWaypoint(robotId, (Number(x)-10)/20, ((Number(y)+10)/-20), 0);
+      await addWaypoint(robotId, (Number(x)), (Number(y)), 0);
       setIsAddingWaypoint(!isAddingWaypoint);
       router.reload();
     }
@@ -95,7 +98,7 @@ const useMapData = (robotId) => {
     setIsAddingWaypoint,
     mousePosition,
     imageSize,
-    setImageSize, 
+    setImageSize,
   };
 };
 

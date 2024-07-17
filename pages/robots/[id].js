@@ -9,12 +9,11 @@ import PageHead from "@/components/layout/PageHead";
 import RosConnection from "@/components/RosConnection";
 import MapDisplay from "@/components/MapDisplay";
 import odomListener from "@/lib/odom";
-import { sendTaskToROS } from "@/lib/assign-task";
 
 import { deleteWaypoint, deleteAllWaypoints } from "@/utils/handle-waypoint";
 import { deleteRobot } from "@/utils/delete-robot";
 import { dijkstra } from "@/utils/dijkstra";
-import { addTask, deleteTask } from "@/utils/handle-task";
+import { addTask, assingTask, deleteTask } from "@/utils/handle-task";
 
 export default function Robot({ robots, waypoints, tasks }) {
   const router = useRouter(),
@@ -64,6 +63,10 @@ export default function Robot({ robots, waypoints, tasks }) {
       await deleteAllWaypoints(waypoints);
       router.reload();
     }
+  };
+
+  const onAssignTask = async (task_id) => {
+    await assingTask(task_id);
   };
 
   if (router.isFallback) {
@@ -189,14 +192,14 @@ export default function Robot({ robots, waypoints, tasks }) {
                       </button>
                     </div>
                   </div>
-                  {dijkstraResult && (
+                  {dijkstraResult>0 && (
                     <>
                       <p>Hedef nokta için bulunan en kısa yol:</p>
-                      <p className="fw-lighter text-nowrap">(Görevi kaydetmek için yolun üstüne tıklayın.)</p>
                       <p
                         className="mb-3 text-decoration-underline fw-bold text-primary"
                         onClick={onAddTask}
                         style={{ cursor: "pointer" }}
+                        title={`Görevi kaydetmek için tıklayın`}
                       >
                         {dijkstraResult.join(" -> ")}
                       </p>
@@ -216,14 +219,15 @@ export default function Robot({ robots, waypoints, tasks }) {
                             {task.waypoint_ids.split(",").join(" -> ")}
                             <button
                               className="btn btn-sm btn-success ms-auto"
-                              /*                               onClick={() => handleSendTask(task.task_id)}
-                               */
+                              onClick={() => onAssignTask(task.task_id)}
+                              title={`Görevi Başlat`}
                             >
                               ✔
                             </button>
                             <button
                               className="btn btn-sm btn-danger"
                               onClick={() => onDeleteTask(task.task_id)}
+                              title={`Görevi Sil`}
                             >
                               ✕
                             </button>

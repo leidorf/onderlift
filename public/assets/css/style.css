@@ -371,13 +371,21 @@ a:hover {
   left: 2px;
 }
 
+.zoom-in {
+  top: 54px;
+}
+
+.zoom-out {
+  top: 81px;
+}
 .active-mode {
   border: 2px solid #be1522;
   padding-top: 2px;
 }
 
 .map-image {
-  zoom: 1; /* initial zoom */
+  zoom: 1; 
+  transform-origin: "0 0";
 }
 
 .btn-danger {
