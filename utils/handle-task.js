@@ -32,7 +32,7 @@ export const deleteAllTasks = async (tasks) => {
   }
 };
 
-export const assingTask = async (task_id) => {
+export const assignTask = async (task_id) => {
   try {
     const response = await fetch("/api/assign-task", {
       method: "POST",

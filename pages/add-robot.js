@@ -21,21 +21,11 @@ export default function AddRobot() {
     });
   };
 
-  const handleFileChange = (e) => {
-    setRobotData({
-      ...robotData,
-      photo: e.target.files[0],
-    });
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const formData = new FormData();
     formData.append("ip_address", robotData.ip_address);
-    if (robotData.photo) {
-      formData.append("photo", robotData.photo);
-    }
 
     try {
       await axios.post("/api/add-robot", formData, {
@@ -60,7 +50,7 @@ export default function AddRobot() {
             onSubmit={handleSubmit}
             className="col"
           >
-            <div className="form-floating">
+            <div className="form-floating mb-3">
               <input
                 type="text"
                 className="form-control"
@@ -74,19 +64,7 @@ export default function AddRobot() {
               />
               <label for="ipAddress">IP Adresi</label>
             </div>
-            <br />
-{/*             <div className="form-group">
-              <label htmlFor="photo">Fotoğraf</label>
-              <input
-                type="file"
-                className="form-control"
-                id="photo"
-                name="photo"
-                onChange={handleFileChange}
-                accept="image/png, image/jpeg, image/jpg"
-              />
-            </div> */}
-            <br />
+
             <div className="row row-cols-auto">
               <div className="col">
                 <Link href="/">

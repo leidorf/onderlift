@@ -13,7 +13,7 @@ import odomListener from "@/lib/odom";
 import { deleteWaypoint, deleteAllWaypoints } from "@/utils/handle-waypoint";
 import { deleteRobot } from "@/utils/delete-robot";
 import { dijkstra } from "@/utils/dijkstra";
-import { addTask, assingTask, deleteTask } from "@/utils/handle-task";
+import { addTask, assignTask, deleteTask } from "@/utils/handle-task";
 
 export default function Robot({ robots, waypoints, tasks }) {
   const router = useRouter(),
@@ -66,7 +66,7 @@ export default function Robot({ robots, waypoints, tasks }) {
   };
 
   const onAssignTask = async (task_id) => {
-    await assingTask(task_id);
+    await assignTask(task_id);
   };
 
   if (router.isFallback) {
@@ -85,7 +85,9 @@ export default function Robot({ robots, waypoints, tasks }) {
               </h4>
               <RosConnection />
               <p>Robot Kayıt Tarihi: {new Date(robots.created_at).toLocaleString("tr-TR")}</p>
+              <hr />
             </div>
+
             <div className="row">
               <div className="mb-3 col">
                 <div className="row mb-3">
@@ -131,7 +133,7 @@ export default function Robot({ robots, waypoints, tasks }) {
                 <p className="fw-lighter">(Silmek istediğiniz noktanın üzerine tıklayın.)</p>
                 <div>
                   <ul className="mb-3">
-                    {waypoints.map((waypoint, index) => (
+                    {waypoints.map((waypoint) => (
                       <li key={waypoint.waypoint_id}>
                         <p className="text-wrap">
                           <button
@@ -140,7 +142,7 @@ export default function Robot({ robots, waypoints, tasks }) {
                             className={`${isDeletionEnabled ? "text-danger" : "text-muted"} btn btn-link text-decoration-none`}
                             disabled={!isDeletionEnabled}
                           >
-                            Nokta {index + 1}-{waypoint.waypoint_id}
+                            Nokta {waypoint.waypoint_id}
                           </button>
                           X: {Number(waypoint.x_coordinate).toFixed(3)}, Y: {Number(waypoint.y_coordinate).toFixed(3)}, Z:{" "}
                           {Number(waypoint.z_coordinate).toFixed(3)}
@@ -192,7 +194,7 @@ export default function Robot({ robots, waypoints, tasks }) {
                       </button>
                     </div>
                   </div>
-                  {dijkstraResult>0 && (
+                  {dijkstraResult && (
                     <>
                       <p>Hedef nokta için bulunan en kısa yol:</p>
                       <p
