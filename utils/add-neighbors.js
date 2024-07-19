@@ -1,6 +1,6 @@
 import { calculateDistance } from "./calculate-distance";
 
-const MAX_DISTANCE = 1.25;
+const MAX_DISTANCE = 1.5;
 
 export function addNeighbors(nodes) {
   nodes.forEach((node) => {

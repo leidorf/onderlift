@@ -31,3 +31,27 @@ export default async function handler(req, res) {
     res.status(500).json({ success: false, error: 'Veritabanı hatası' });
   }
 }
+
+/**
+ * @swagger
+ * /api/delete-waypoint:
+ *   delete:
+ *     tags:
+ *       - waypoint
+ *     summary: Delete the waypoint 
+ *     description: Deletes a waypoint from the database using the waypoint ID. If the waypoint is associated with any tasks, the related tasks are also deleted.
+ *     parameters:
+ *       - name: waypoint_id
+ *         in: query
+ *         required: true
+ *         description: The ID of the waypoint to delete.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Waypoint and associated tasks successfully deleted.
+ *       400:
+ *         description: Waypoint ID is required.
+ *       500:
+ *         description: Database error occurred.
+ */

@@ -17,7 +17,7 @@ export default function HomePage({ robots }) {
                 {robots.map((robot) => (
                   <li key={robot.robot_id}>
                     <div>
-                      <h5 className="text-decoration-underline">
+                      <h5 className="link-black">
                         <Link href={`/robots/${robot.robot_id}`}>Robot ID: {robot.robot_id}</Link>
                       </h5>
                       <RosConnection />

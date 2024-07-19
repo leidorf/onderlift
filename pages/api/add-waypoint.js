@@ -35,3 +35,89 @@ export default async function handler(req, res) {
       .json({ success: false, message: `Method ${req.method} not allowed` });
   }
 }
+
+/**
+ * @swagger
+ * /api/add-waypoint:
+ *   post:
+ *     tags:
+ *       - waypoint
+ *     summary: Create a new waypoint for a robot
+ *     description: Adds a new waypoint to the database with the provided robot ID and coordinates.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               robot_id:
+ *                 type: integer
+ *                 description: The ID of the robot.
+ *                 example: 1
+ *               x_coordinate:
+ *                 type: number
+ *                 description: The X coordinate of the waypoint.
+ *                 example: 12.34
+ *               y_coordinate:
+ *                 type: number
+ *                 description: The Y coordinate of the waypoint.
+ *                 example: 56.78
+ *               z_coordinate:
+ *                 type: number
+ *                 description: The Z coordinate of the waypoint.
+ *                 example: 90.12
+ *     responses:
+ *       200:
+ *         description: Successfully created the waypoint.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Yol başarıyla eklendi"
+ *       400:
+ *         description: Missing or invalid fields.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Eksik bilgi"
+ *       500:
+ *         description: Database error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Veritabanı hatası"
+ *       405:
+ *         description: Method not allowed.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Method POST not allowed"
+ */
