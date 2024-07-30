@@ -1,21 +1,15 @@
-import { getApiDocs } from '@/lib/swagger';
-import ReactSwagger from './api-doc/react-swagger';
+import Layout from "@/components/layout/Layout";
+import SwaggerUI from "swagger-ui-react";
+import "swagger-ui-react/swagger-ui.css";
 
-export async function getStaticProps() {
-  const spec = await getApiDocs();
-  return {
-    props: {
-      spec,
-    },
-  };
-}
-
-function ApiDocPage({ spec }) {
+export default function SwaggerDocs() {
   return (
-    <section className="container">
-      <ReactSwagger spec={spec} />
-    </section>
+    <>
+      <Layout>
+        <div>
+          <SwaggerUI url="/swagger.yaml" />
+        </div>
+      </Layout>
+    </>
   );
 }
-
-export default ApiDocPage;

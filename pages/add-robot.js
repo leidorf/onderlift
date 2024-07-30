@@ -28,7 +28,7 @@ export default function AddRobot() {
     formData.append("ip_address", robotData.ip_address);
 
     try {
-      await axios.post("/api/add-robot", formData, {
+      await axios.post("/api/robot", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },

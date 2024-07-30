@@ -2,7 +2,7 @@ import axios from "axios";
 
 export const deleteWaypoint = async (waypoint_id) => {
   try {
-    await axios.delete(`/api/delete-waypoint?waypoint_id=${waypoint_id}`);
+    await axios.delete(`/api/waypoint?waypoint_id=${waypoint_id}`);
   } catch (error) {
     console.error("Yol silme hatası:", error);
   }
@@ -12,7 +12,7 @@ export const deleteWaypointConf = async (waypoint_id) => {
   try {
     const confirmDeleteWaypoint = confirm(`Yol silinsin mi?`);
     if (confirmDeleteWaypoint) {
-      await axios.delete(`/api/delete-waypoint?waypoint_id=${waypoint_id}`);
+      await axios.delete(`/api/waypoint?waypoint_id=${waypoint_id}`);
       alert("Yol başarıyla silindi!");
     }
   } catch (error) {
@@ -32,7 +32,7 @@ export const deleteAllWaypoints = async (waypoints) => {
 
 export const addWaypoint = async (robotId, x, y, z) => {
   try {
-    await axios.post("/api/add-waypoint", {
+    await axios.post("/api/waypoint", {
       robot_id: robotId,
       x_coordinate: x,
       y_coordinate: y,

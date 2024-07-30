@@ -12,37 +12,3 @@ export default async function handler(req, res) {
     res.status(405).json({ message: "Method not allowed" });
   }
 }
-
-/**
- * @swagger
- * /api/robots:
- *   get:
- *     tags:
- *       - robot
- *     summary: Retrieve a list of all robots
- *     description: Retrieves a list of all robots from the database.
- *     responses:
- *       200:
- *         description: A list of robots successfully retrieved.
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   robot_id:
- *                     type: integer
- *                     description: Unique identifier of the robot.
- *                   ip_address:
- *                     type: string
- *                     description: IP address of the robot.
- *                   created_at:
- *                     type: string
- *                     format: date-time
- *                     description: Timestamp when the robot was created.
- *       500:
- *         description: Failed to fetch robots.
- *       405:
- *         description: Method not allowed.
- */

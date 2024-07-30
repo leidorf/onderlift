@@ -281,7 +281,7 @@ export async function getStaticPaths() {
 
 export async function getStaticProps({ params }) {
   const [robotRes, waypointRes, taskRes] = await Promise.all([
-    axios.get(`http://localhost:3000/api/robots/${params.id}`),
+    axios.get(`http://localhost:3000/api/robot/?robot_id=${params.id}`),
     axios.get(`http://localhost:3000/api/waypoints?robot_id=${params.id}`),
     axios.get(`http://localhost:3000/api/tasks?robot_id=${params.id}`),
   ]);

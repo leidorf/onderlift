@@ -15,11 +15,21 @@ const Footer = () => {
           </div>
 
           <ul className="nav col-md-4 justify-content-end list-unstyled d-flex">
+            {/* api */}
+            <li className="ms-3 hover-up">
+              <Link
+                className="text-decoration-none"
+                href="/api-doc"
+              >
+                API
+              </Link>
+            </li>
             {/* github */}
             <li className="ms-3 hover-up">
               <Link
                 className="text-decoration-none"
                 href="https://github.com/leidorf"
+                target="_blank"
               >
                 github
               </Link>

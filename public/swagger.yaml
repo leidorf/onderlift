@@ -1,0 +1,719 @@
+openapi: 3.0.0
+info:
+  title: AGV FMS Web Interface APIs
+  description: APIs for managing robots
+  version: 1.0.0
+paths:
+  #ROBOT DOCUMENTATION
+  /api/robot:
+    post:
+      tags:
+        - robot
+      summary: Yeni bir robot ekler
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                ip_address:
+                  type: string
+                  example: "192.168.1.1"
+              required:
+                - ip_address
+      responses:
+        "200":
+          description: Robot başarıyla kaydedildi
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Robot başarıyla kaydedildi
+        "400":
+          description: Geçersiz IP adresi
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string
+                    example: Geçersiz IP adresi
+        "500":
+          description: Form parse hatası veya veritabanı hatası
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string
+                    example: Form parse hatası
+
+    get:
+      tags:
+        - robot
+      summary: Bir robotun bilgilerini alır
+      parameters:
+        - in: query
+          name: robot_id
+          schema:
+            type: integer
+          required: true
+          description: Alınacak robotun ID'si
+      responses:
+        "200":
+          description: Robot bilgileri başarıyla alındı
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  robot_id:
+                    type: integer
+                  ip_address:
+                    type: string
+                  created_at:
+                    type: string
+                    format: date-time
+        "404":
+          description: Robot bulunamadı
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string
+                    example: Robot bulunamadı
+        "500":
+          description: Veritabanı hatası
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string
+                    example: Veritabanı hatası
+
+    delete:
+      tags:
+        - robot
+      summary: Bir robotu ve ilişkili waypoint'leri siler
+      parameters:
+        - in: query
+          name: robot_id
+          schema:
+            type: integer
+          required: true
+          description: Silinecek robotun ID'si
+      responses:
+        "200":
+          description: Robot başarıyla silindi
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Robot başarıyla silindi
+        "400":
+          description: Robot ID belirtilmeli
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string
+                    example: Robot ID belirtilmeli
+        "500":
+          description: Veritabanı hatası
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string
+                    example: Veritabanı hatası
+
+  /api/robots:
+    get:
+      tags:
+        - robot
+      summary: Retrieve a list of all robots
+      description: Retrieves a list of all robots from the database.
+      responses:
+        200:
+          description: A list of robots successfully retrieved.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    robot_id:
+                      type: integer
+                      description: Unique identifier of the robot.
+                    ip_address:
+                      type: string
+                      description: IP address of the robot.
+                    created_at:
+                      type: string
+                      format: date-time
+                      description: Timestamp when the robot was created.
+        500:
+          description: Failed to fetch robots.
+        405:
+          description: Method not allowed.
+
+  #WAYPOINT DOCUMENTATION
+  /api/waypoint:
+    post:
+      tags:
+        - waypoint
+      summary: Yeni bir waypoint ekler
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                robot_id:
+                  type: integer
+                  example: 1
+                x_coordinate:
+                  type: number
+                  format: float
+                y_coordinate:
+                  type: number
+                  format: float
+                z_coordinate:
+                  type: number
+                  format: float
+              required:
+                - robot_id
+                - x_coordinate
+                - y_coordinate
+                - z_coordinate
+      responses:
+        "200":
+          description: Waypoint başarıyla eklendi
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Yol başarıyla eklendi
+        "400":
+          description: Eksik bilgi
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Eksik bilgi
+        "500":
+          description: Veritabanı hatası
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Veritabanı hatası
+
+    get:
+      tags:
+        - waypoint
+      summary: Belirli bir waypoint bilgilerini alır
+      parameters:
+        - in: query
+          name: waypoint_id
+          schema:
+            type: integer
+          required: true
+          description: Alınacak waypoint'in ID'si
+      responses:
+        "200":
+          description: Waypoint bilgileri başarıyla alındı
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  waypoint_id:
+                    type: integer
+                  robot_id:
+                    type: integer
+                  x_coordinate:
+                    type: number
+                    format: float
+                  y_coordinate:
+                    type: number
+                    format: float
+                  z_coordinate:
+                    type: number
+                    format: float
+        "400":
+          description: Waypoint ID belirtilmeli
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Waypoint ID belirtilmeli
+        "500":
+          description: Veritabanı hatası
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Veritabanı hatası
+
+    delete:
+      tags:
+        - waypoint
+      summary: Bir waypoint'i ve ilişkili görevleri siler
+      parameters:
+        - in: query
+          name: waypoint_id
+          schema:
+            type: integer
+          required: true
+          description: Silinecek waypoint'in ID'si
+      responses:
+        "200":
+          description: Waypoint ve ilişkili görevler başarıyla silindi
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Waypoint ve ilişkili görev başarıyla silindi
+        "400":
+          description: Waypoint ID belirtilmeli
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string
+                    example: Waypoint ID belirtilmeli
+        "500":
+          description: Veritabanı hatası
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string
+                    example: Veritabanı hatası
+
+  /api/waypoints:
+    get:
+      tags:
+        - waypoint
+      summary: Belirli bir robot için waypoint'leri alır
+      parameters:
+        - in: query
+          name: robot_id
+          schema:
+            type: integer
+          required: true
+          description: Alınacak robotun ID'si
+      responses:
+        "200":
+          description: Waypoint'ler başarıyla alındı
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    waypoint_id:
+                      type: integer
+                    robot_id:
+                      type: integer
+                    x_coordinate:
+                      type: number
+                      format: float
+                    y_coordinate:
+                      type: number
+                      format: float
+                    z_coordinate:
+                      type: number
+                      format: float
+        "400":
+          description: Robot ID belirtilmeli
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Robot ID belirtilmeli
+        "500":
+          description: Veritabanı hatası
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Veritabanı hatası
+
+  #TASK DOCUMENTATION
+  /api/assign-task:
+    post:
+      tags:
+        - task
+      summary: Send task to ROS
+      description: Sends the task with the specified ID to ROS by publishing waypoints to a ROS topic.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                task_id:
+                  type: integer
+                  description: The ID of the task to be sent to ROS.
+                  example: 1
+      responses:
+        200:
+          description: Task sent to ROS successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Task sent to ROS successfully"
+        404:
+          description: Task not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Task not found"
+        500:
+          description: Failed to send task to ROS.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Failed to send task to ROS"
+
+  /api/task:
+    post:
+      tags:
+        - task
+      summary: Yeni bir görev ekler
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                robot_id:
+                  type: integer
+                  example: 1
+                waypoint_ids:
+                  type: array
+                  items:
+                    type: integer
+                  example: [1, 2, 3]
+              required:
+                - robot_id
+                - waypoint_ids
+      responses:
+        "200":
+          description: Görev başarıyla eklendi
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  task_id:
+                    type: integer
+                    example: 123
+        "400":
+          description: Eksik veya geçersiz alanlar
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Eksik veya geçersiz alanlar
+        "500":
+          description: Veritabanına kaydedilirken bir hata oluştu
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Veritabanına kaydedilirken bir hata oluştu
+
+    get:
+      tags:
+        - task
+      summary: Bir görevin bilgilerini alır
+      parameters:
+        - in: query
+          name: task_id
+          schema:
+            type: integer
+          required: true
+          description: Alınacak görevin ID'si
+      responses:
+        "200":
+          description: Görev bilgileri başarıyla alındı
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  task_id:
+                    type: integer
+                  robot_id:
+                    type: integer
+                  waypoint_ids:
+                    type: array
+                    items:
+                      type: integer
+        "400":
+          description: Görev ID belirtilmeli
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string
+                    example: Görev ID belirtilmeli
+        "404":
+          description: Görev bulunamadı
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string
+                    example: Görev bulunamadı
+        "500":
+          description: Veritabanı hatası
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string
+                    example: Veritabanı hatası
+
+    delete:
+      tags:
+        - task
+      summary: Bir görevi siler
+      parameters:
+        - in: query
+          name: task_id
+          schema:
+            type: integer
+          required: true
+          description: Silinecek görevin ID'si
+      responses:
+        "200":
+          description: Görev başarıyla silindi
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Görev başarıyla silindi
+        "400":
+          description: Görev ID belirtilmeli
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string
+                    example: Görev ID belirtilmeli
+        "500":
+          description: Veritabanı hatası
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string
+                    example: Veritabanı hatası
+
+  /api/tasks:
+    get:
+      tags:
+        - task
+      summary: Retrieve a list of tasks
+      description: Retrieves a list of tasks for a specific robot from the database.
+      parameters:
+        - name: robot_id
+          in: query
+          description: The ID of the robot for which tasks are to be retrieved.
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: A list of tasks successfully retrieved for the specified robot.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    task_id:
+                      type: integer
+                      description: Unique identifier of the task.
+                    robot_id:
+                      type: integer
+                      description: ID of the robot to which the task belongs.
+                    waypoint_ids:
+                      type: string
+                      description: Comma-separated list of waypoint IDs associated with the task.
+        400:
+          description: Robot ID is required to retrieve tasks.
+        500:
+          description: Database error occurred while retrieving tasks.
+        405:
+          description: Method not allowed.
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-KEY
+  security:
+    - ApiKeyAuth: []

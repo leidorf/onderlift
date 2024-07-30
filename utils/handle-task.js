@@ -2,7 +2,7 @@ import axios from "axios";
 
 export const deleteTask = async (task_id) => {
   try {
-    await axios.delete(`/api/delete-task?task_id=${task_id}`);
+    await axios.delete(`/api/task?task_id=${task_id}`);
   } catch (error) {
     console.error("Yol silme hatası:", error);
   }
@@ -10,7 +10,7 @@ export const deleteTask = async (task_id) => {
 
 export const addTask = async (robot_id, waypoint_ids) => {
   try {
-    const response = await axios.post("/api/add-task", {
+    const response = await axios.post("/api/task", {
       robot_id,
       waypoint_ids,
     });

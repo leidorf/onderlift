@@ -4,7 +4,7 @@ export const deleteRobot = async (robot) => {
   try {
     const confirmDelete = confirm(`Robot ${robot} silinsin mi?`);
     if (confirmDelete) {
-      await axios.delete(`/api/delete-robot?id=${robot}`);
+      await axios.delete(`/api/robot?robot_id=${robot}`);
       alert("Robot başarıyla silindi!");
     }
   } catch (error) {
