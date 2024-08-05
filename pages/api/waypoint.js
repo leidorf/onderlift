@@ -1,6 +1,17 @@
 import pool from "../../server/db";
+import rateLimit from "express-rate-limit";
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: "Cok fazla istek gonderildi, lutfen bir sure sonra tekrar deneyiniz.",
+});
 
 export default async function handler(req, res) {
+  await new Promise((resolve, reject) => {
+    limiter(req, res, (result) => (result instanceof Error ? reject(result) : resolve(result)));
+  });
+
   // /api/waypoint get-waypoint API
   if (req.method === "GET") {
     const { waypoint_id } = req.query;

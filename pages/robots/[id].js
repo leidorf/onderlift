@@ -2,6 +2,7 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import { useState } from "react";
 import axios from "axios";
+import { Modal, Button } from "react-bootstrap";
 
 import Layout from "@/components/layout/Layout";
 import PageHead from "@/components/layout/PageHead";
@@ -11,7 +12,7 @@ import MapDisplay from "@/components/MapDisplay";
 import odomListener from "@/lib/odom";
 
 import { deleteWaypoint, deleteAllWaypoints } from "@/utils/handle-waypoint";
-import { deleteRobot } from "@/utils/delete-robot";
+import { deleteRobot, updateRobot } from "@/utils/handle-robot";
 import { dijkstra } from "@/utils/dijkstra";
 import { addTask, assignTask, deleteTask } from "@/utils/handle-task";
 
@@ -21,7 +22,9 @@ export default function Robot({ robots, waypoints, tasks }) {
 
   const [isDeletionEnabled, setIsDeletionEnabled] = useState(false),
     [dijkstraResult, setDijkstraResult] = useState([]),
-    [targetWaypointId, setTargetWaypointId] = useState(null);
+    [targetWaypointId, setTargetWaypointId] = useState(null),
+    [showModal, setShowModal] = useState(false),
+    [robot_ip, setRobotIp] = useState(robots.ip_address);
 
   const robot = {
     id: robots.robot_id,
@@ -50,6 +53,16 @@ export default function Robot({ robots, waypoints, tasks }) {
   const onDeleteRobot = async () => {
     await deleteRobot(robots.robot_id);
     router.push(`/`);
+  };
+
+  const onUpdateRobot = async () => {
+    await updateRobot(robots.robot_id, robot_ip);
+    setShowModal(false);
+    router.reload();
+  };
+
+  const showUpdateModal = async () => {
+    setShowModal(true);
   };
 
   const onDeleteWaypoint = async (waypoint_id) => {
@@ -81,7 +94,7 @@ export default function Robot({ robots, waypoints, tasks }) {
           <div className="mb-5">
             <div className="mb-3">
               <h4>
-                Robot ID: {robots.robot_id}({robots.ip_address})
+                Robot ID: {robots.robot_id} ({robots.ip_address})
               </h4>
               <RosConnection />
               <p>Robot Kayıt Tarihi: {new Date(robots.created_at).toLocaleString("tr-TR")}</p>
@@ -144,8 +157,7 @@ export default function Robot({ robots, waypoints, tasks }) {
                           >
                             Nokta {waypoint.waypoint_id}
                           </button>
-                          X: {Number(waypoint.x_coordinate).toFixed(3)}, Y: {Number(waypoint.y_coordinate).toFixed(3)}, Z:{" "}
-                          {Number(waypoint.z_coordinate).toFixed(3)}
+                          X: {Number(waypoint.x_coordinate).toFixed(3)}, Y: {Number(waypoint.y_coordinate).toFixed(3)}, Z: {Number(waypoint.z_coordinate).toFixed(3)}
                         </p>
                       </li>
                     ))}
@@ -186,9 +198,7 @@ export default function Robot({ robots, waypoints, tasks }) {
                     <div>
                       <button
                         onClick={showShortestPath}
-                        className={`btn col ${
-                          waypoints.length !== 0 && targetWaypointId && robot.x_coordinate !== 0 ? "btn-success" : "btn-outline-secondary disabled"
-                        }`}
+                        className={`btn col ${waypoints.length !== 0 && targetWaypointId && robot.x_coordinate !== 0 ? "btn-success" : "btn-outline-secondary disabled"}`}
                       >
                         Yolu Göster
                       </button>
@@ -248,8 +258,16 @@ export default function Robot({ robots, waypoints, tasks }) {
                 <button className="btn btn-primary">Ana Sayfa</button>
               </Link>
             </div>
-            <div className="d-flex row row-cols-auto">
-              <div className="col">
+            <div className="d-flex col-3">
+              <div className="me-auto ms-3">
+                <button
+                  className="btn btn-warning"
+                  onClick={showUpdateModal}
+                >
+                  Robotu Güncelle
+                </button>
+              </div>
+              <div className="">
                 <button
                   className="btn btn-danger"
                   onClick={onDeleteRobot}
@@ -261,6 +279,51 @@ export default function Robot({ robots, waypoints, tasks }) {
           </div>
         </div>
       </Layout>
+
+      <Modal
+        show={showModal}
+        onHide={() => setShowModal(false)}
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Robotu Güncelle</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <form>
+            <div className="mb-3">
+              <label
+                htmlFor="robot_ip"
+                className="form-label"
+              >
+                IP Adresi
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                id="robot_ip"
+                value={robot_ip}
+                onChange={(e) => setRobotIp(e.target.value)}
+              />
+            </div>
+          </form>
+        </Modal.Body>
+        <Modal.Footer>
+          <div className="d-flex justify-content-between w-100">
+              <Button
+                variant="success"
+                onClick={onUpdateRobot}
+              >
+                Kaydet
+              </Button>
+              <Button
+                variant="danger"
+                onClick={() => setShowModal(false)}
+              >
+                Kapat
+              </Button>
+          </div>
+        </Modal.Footer>
+      </Modal>
     </>
   );
 }
