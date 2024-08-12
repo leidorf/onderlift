@@ -20,6 +20,7 @@ const Footer = () => {
               <Link
                 className="text-decoration-none"
                 href="/api-doc"
+                target="_blank"
               >
                 API
               </Link>

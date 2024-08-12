@@ -42,12 +42,12 @@ export default function Robot({ robots, waypoints, tasks }) {
 
   const onAddTask = async () => {
     await addTask(robots.robot_id, dijkstraResult);
-    router.reload();
+    router.replace(router.asPath);
   };
 
   const onDeleteTask = async (task_id) => {
     await deleteTask(task_id);
-    router.reload();
+    router.replace(router.asPath);
   };
 
   const onDeleteRobot = async () => {
@@ -58,7 +58,7 @@ export default function Robot({ robots, waypoints, tasks }) {
   const onUpdateRobot = async () => {
     await updateRobot(robots.robot_id, robot_ip);
     setShowModal(false);
-    router.reload();
+    router.replace(router.asPath);
   };
 
   const showUpdateModal = async () => {
@@ -67,14 +67,14 @@ export default function Robot({ robots, waypoints, tasks }) {
 
   const onDeleteWaypoint = async (waypoint_id) => {
     await deleteWaypoint(waypoint_id);
-    router.reload();
+    router.replace(router.asPath);
   };
 
   const onDeleteAllWaypoints = async () => {
     const confirmDeleteAllWaypoints = confirm("Tüm yollar silinsin mi?");
     if (confirmDeleteAllWaypoints) {
       await deleteAllWaypoints(waypoints);
-      router.reload();
+      router.replace(router.asPath);
     }
   };
 
@@ -102,24 +102,33 @@ export default function Robot({ robots, waypoints, tasks }) {
             </div>
 
             <div className="row">
-              <div className="mb-3 col">
+              <div className="mb-4 col">
                 <div className="row mb-3">
-                  <div className="col-4 bg-light fw-bold">X Pozisyonu</div>
-                  <div className="col-4 bg-light fw-bold">Y Pozisyonu</div>
-                  <div className="col-4 bg-light fw-bold">Z Pozisyonu</div>
-                  <div className="w-100"></div>
-                  <div className="col-4">{robot.x_coordinate}</div>
-                  <div className="col-4">{robot.y_coordinate}</div>
-                  <div className="col-4">{robot.z_coordinate}</div>
+                  <div className="col-3">
+                    <span className="fw-bolder">X Pozisyonu </span>
+                    <br /> {robot.x_coordinate}
+                  </div>
+                  <div className="col-3">
+                    <span className="fw-bolder">Y Pozisyonu</span>
+                    <br /> {robot.y_coordinate}
+                  </div>
+                  <div className="col-3">
+                    <span className="fw-bolder">Z Pozisyonu</span>
+                    <br /> {robot.z_coordinate}
+                  </div>
                 </div>
-                <div className="row mb-3">
-                  <div className="col-4 bg-light fw-bold">Yaw</div>
-                  <div className="col-4 bg-light fw-bold">Roll</div>
-                  <div className="col-4 bg-light fw-bold">Pitch</div>
-                  <div className="w-100"></div>
-                  <div className="col-4">{robot.yaw}</div>
-                  <div className="col-4">{robot.roll}</div>
-                  <div className="col-4">{robot.pitch}</div>
+                <div className="row mb-4">
+                  <div className="col-3">
+                    <span className="fw-bolder">Yaw</span> <br /> {robot.yaw}
+                  </div>
+                  <div className="col-3">
+                    <span className="fw-bolder">Roll</span>
+                    <br /> {robot.roll}
+                  </div>
+                  <div className="col-3">
+                    <span className="fw-bolder">Pitch</span>
+                    <br /> {robot.pitch}
+                  </div>
                 </div>
                 <div className="col">
                   <MapDisplay
@@ -143,17 +152,17 @@ export default function Robot({ robots, waypoints, tasks }) {
                     Nokta silme modu
                   </label>
                 </div>
-                <p className="fw-lighter">(Silmek istediğiniz noktanın üzerine tıklayın.)</p>
                 <div>
-                  <ul className="mb-3">
+                  <ul className="mb-2">
                     {waypoints.map((waypoint) => (
                       <li key={waypoint.waypoint_id}>
                         <p className="text-wrap">
                           <button
                             style={{ paddingLeft: "0px" }}
                             onClick={() => onDeleteWaypoint(waypoint.waypoint_id)}
-                            className={`${isDeletionEnabled ? "text-danger" : "text-muted"} btn btn-link text-decoration-none`}
+                            className={`${isDeletionEnabled ? "text-danger" : "text-muted"} btn btn-link`}
                             disabled={!isDeletionEnabled}
+                            title={"Noktayı silmek için tıklayın"}
                           >
                             Nokta {waypoint.waypoint_id}
                           </button>
@@ -162,7 +171,7 @@ export default function Robot({ robots, waypoints, tasks }) {
                       </li>
                     ))}
                   </ul>
-                  <div className="d-flex justify-content-end">
+                  <div className="d-flex justify-content-end mb-4">
                     <button
                       onClick={onDeleteAllWaypoints}
                       className={`btn ${isDeletionEnabled ? "btn-outline-danger" : "btn-outline-secondary"}`}
@@ -174,7 +183,7 @@ export default function Robot({ robots, waypoints, tasks }) {
                   <hr />
                 </div>
                 <div>
-                  <h5>Varış Noktası:</h5>
+                  <h5>Hedef Nokta:</h5>
                   <div className="d-flex mb-3">
                     <div className="me-auto">
                       <select
@@ -198,7 +207,7 @@ export default function Robot({ robots, waypoints, tasks }) {
                     <div>
                       <button
                         onClick={showShortestPath}
-                        className={`btn col ${waypoints.length !== 0 && targetWaypointId && robot.x_coordinate !== 0 ? "btn-success" : "btn-outline-secondary disabled"}`}
+                        className={`btn col ${waypoints.length !== 0 && targetWaypointId && robot.x_coordinate !== 0 ? "btn-outline-primary" : "btn-outline-secondary disabled"}`}
                       >
                         Yolu Göster
                       </button>
@@ -218,7 +227,7 @@ export default function Robot({ robots, waypoints, tasks }) {
                     </>
                   )}
                   <div>
-                    <h5 className="mb-3">Robotun Görevi:</h5>
+                    <h5 className="mb-3">Robotun Görevleri:</h5>
                     <ul>
                       {tasks.map((task) => (
                         <li
@@ -309,18 +318,18 @@ export default function Robot({ robots, waypoints, tasks }) {
         </Modal.Body>
         <Modal.Footer>
           <div className="d-flex justify-content-between w-100">
-              <Button
-                variant="success"
-                onClick={onUpdateRobot}
-              >
-                Kaydet
-              </Button>
-              <Button
-                variant="danger"
-                onClick={() => setShowModal(false)}
-              >
-                Kapat
-              </Button>
+            <Button
+              variant="success"
+              onClick={onUpdateRobot}
+            >
+              Kaydet
+            </Button>
+            <Button
+              variant="danger"
+              onClick={() => setShowModal(false)}
+            >
+              Kapat
+            </Button>
           </div>
         </Modal.Footer>
       </Modal>

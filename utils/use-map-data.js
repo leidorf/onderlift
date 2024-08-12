@@ -28,16 +28,13 @@ const useMapData = (robotId) => {
       const { width, height, resolution } = mapData.info;
       const data = mapData.data;
 
-      // Clear the canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Draw the grid
       for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
           const index = y * width + x;
           const value = data[index];
 
-          // Determine the color based on the value
           let color;
           if (value === -1) {
             color = "#808080"; // Unknown
@@ -75,7 +72,7 @@ const useMapData = (robotId) => {
       const { x, y } = mousePosition;
       await addWaypoint(robotId, (Number(x)), (Number(y)), 0);
       setIsAddingWaypoint(!isAddingWaypoint);
-      router.reload();
+      router.replace(router.asPath);
     }
   };
 

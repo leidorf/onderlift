@@ -14,10 +14,6 @@ export const addTask = async (robot_id, waypoint_ids) => {
       robot_id,
       waypoint_ids,
     });
-
-    if (response.status === 200) {
-      alert("Görev başarıyla kaydedildi");
-    }
   } catch (error) {
     alert("Görev kaydedilirken bir hata oluştu");
   }

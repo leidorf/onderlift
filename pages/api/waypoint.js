@@ -28,8 +28,8 @@ export default async function handler(req, res) {
       console.error("Veritabanı hatası:", error);
       res.status(500).json({ success: false, message: "Veritabanı hatası" });
     }
-  } 
-    // /api/waypoint delete-waypoint API
+  }
+  // /api/waypoint delete-waypoint API
   else if (req.method === "DELETE") {
     const { waypoint_id } = req.query;
 
@@ -40,7 +40,7 @@ export default async function handler(req, res) {
     try {
       const [tasks] = await pool.query(
         `
-      SELECT * FROM tasks WHERE FIND_IN_SET(?, waypoint_ids)
+      SELECT * FROM tasks WHERE waypoint_ids LIKE CONCAT('%', ?, '%')
     `,
         [waypoint_id]
       );
@@ -63,7 +63,7 @@ export default async function handler(req, res) {
       console.error("Veritabanı hatası:", error);
       res.status(500).json({ success: false, error: "Veritabanı hatası" });
     }
-  } 
+  }
   // /api/waypoint add-waypoint API
   else if (req.method === "POST") {
     const { robot_id, x_coordinate, y_coordinate, z_coordinate } = req.body;

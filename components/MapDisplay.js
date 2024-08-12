@@ -3,18 +3,7 @@ import { waypointColors } from "@/utils/waypoint-colors";
 import React, { useEffect, useState } from "react";
 
 const MapDisplay = ({ waypoints, robot }) => {
-  const {
-    mapData,
-    canvasRef,
-    handleMouseMove,
-    handleImageClick,
-    handleImageLoad,
-    isAddingWaypoint,
-    setIsAddingWaypoint,
-    mousePosition,
-    imageSize,
-    setImageSize,
-  } = useMapData(robot.id);
+  const { mapData, canvasRef, handleMouseMove, handleImageClick, handleImageLoad, isAddingWaypoint, setIsAddingWaypoint, mousePosition, imageSize, setImageSize } = useMapData(robot.id);
 
   const [zoomFactor, setZoomFactor] = useState(1);
 
@@ -58,7 +47,7 @@ const MapDisplay = ({ waypoints, robot }) => {
 
   return (
     <div>
-      <p>Harita: {isAddingWaypoint && <span> Nokta Ekleme Modu Aktif</span>}</p>
+      <p className="fw-bolder">Harita: {isAddingWaypoint && <span className="text-danger"> Nokta Ekleme Modu Aktif</span>}</p>
       <div style={{ position: "relative" }}>
         {!mapData ? (
           <div
@@ -132,9 +121,7 @@ const MapDisplay = ({ waypoints, robot }) => {
                     left: `${xPos}px`,
                     backgroundColor: color,
                   }}
-                  title={`Nokta ${waypoint.waypoint_id}: X: ${parseFloat(waypoint.x_coordinate).toFixed(5)} - Y: ${parseFloat(waypoint.y_coordinate).toFixed(
-                    5
-                  )}`}
+                  title={`Nokta ${waypoint.waypoint_id}: X: ${parseFloat(waypoint.x_coordinate).toFixed(5)} - Y: ${parseFloat(waypoint.y_coordinate).toFixed(5)}`}
                 />
               );
             })}

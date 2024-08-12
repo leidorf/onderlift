@@ -4,7 +4,5 @@ export const waypointColors = [
   "green",
   "orange",
   "purple",
-  "yellow",
-  "cyan",
   "magenta",
 ];
