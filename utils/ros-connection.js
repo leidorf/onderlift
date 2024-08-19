@@ -1,4 +1,6 @@
-import ROSLIB from 'roslib';
+import ROSLIB from 'roslib';  // Ensure this line is present at the top
+
+let rosInstance;
 
 async function fetchRobotData() {
   try {
@@ -17,27 +19,29 @@ async function fetchRobotData() {
 
 export async function connectToRobots() {
   const robots = await fetchRobotData();
-  console.log(robots);  // This will log the array of robot objects
+  console.log(robots);
 
-  const rosConnections = robots.map(robot => {
-    const ros = new ROSLIB.Ros({
+  // Assuming you want to use the first robot's connection details
+  if (robots.length > 0) {
+    const robot = robots[0];
+    rosInstance = new ROSLIB.Ros({
       url: `ws://${robot.ip_address}:9090`,
     });
 
-    ros.on('connection', () => {
+    rosInstance.on('connection', () => {
       console.log(`Connected to ROS server at ${robot.ip_address}`);
     });
 
-    ros.on('error', (error) => {
+    rosInstance.on('error', (error) => {
       console.error(`Error connecting to ROS server at ${robot.ip_address}:`, error);
     });
 
-    ros.on('close', () => {
+    rosInstance.on('close', () => {
       console.log(`Connection to ROS server at ${robot.ip_address} closed`);
     });
+  }
 
-    return { ros, robot };
-  });
-
-  return rosConnections;
+  return rosInstance;
 }
+
+export default rosInstance;

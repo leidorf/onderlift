@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import ros from "@/lib/ros";
+import { connectToRobots } from "@/utils/ros-connection";
 
 export default function RosConnection() {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
+    let ros;
 
     const handleConnection = () => {
       if (isMounted) {
@@ -19,17 +20,26 @@ export default function RosConnection() {
       }
     };
 
-    ros.on("connection", handleConnection);
-    ros.on("close", handleClose);
+    async function initRos() {
+      ros = await connectToRobots();
+      if (ros) {
+        ros.on("connection", handleConnection);
+        ros.on("close", handleClose);
 
-    if (ros.isConnected) {
-      handleConnection();
+        if (ros.isConnected) {
+          handleConnection();
+        }
+      }
     }
+
+    initRos();
 
     return () => {
       isMounted = false;
-      ros.off("connection", handleConnection);
-      ros.off("close", handleClose);
+      if (ros) {
+        ros.off("connection", handleConnection);
+        ros.off("close", handleClose);
+      }
     };
   }, []);
 
