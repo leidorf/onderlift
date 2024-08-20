@@ -96,7 +96,7 @@ export default function Robot({ robots, waypoints, tasks }) {
               <h4>
                 Robot ID: {robots.robot_id} ({robots.ip_address})
               </h4>
-              <RosConnection />
+              <RosConnection ipAddress={robots.ip_address} />
               <p>Robot Kayıt Tarihi: {new Date(robots.created_at).toLocaleString("tr-TR")}</p>
               <hr />
             </div>

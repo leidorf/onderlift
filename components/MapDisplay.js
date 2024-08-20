@@ -3,7 +3,7 @@ import { waypointColors } from "@/utils/waypoint-colors";
 import React, { useEffect, useState } from "react";
 
 const MapDisplay = ({ waypoints, robot }) => {
-  const { mapData, canvasRef, handleMouseMove, handleImageClick, handleImageLoad, isAddingWaypoint, setIsAddingWaypoint, mousePosition, imageSize, setImageSize } = useMapData(robot.id);
+  const { mapData, canvasRef, handleMouseMove, handleImageClick, handleImageLoad, isAddingWaypoint, setIsAddingWaypoint, mousePosition, imageSize, setImageSize } = useMapData(robot.id, robot.ip_address);
 
   const [zoomFactor, setZoomFactor] = useState(1);
 
