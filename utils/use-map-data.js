@@ -13,11 +13,9 @@ const useMapData = (robotId, ip_address) => {
   const router = useRouter();
 
   useEffect(() => {
-    // Initialize ROS connection
     const rosInstance = new ROSLIB.Ros({
-      url: `ws://${ip_address}:9090`, // Replace with your ROS WebSocket URL
+      url: `ws://${ip_address}:9090`, 
     });
-    console.log(ip_address);
 
     rosInstance.on('connection', () => {
       console.log('Connected to ROS');
@@ -31,7 +29,6 @@ const useMapData = (robotId, ip_address) => {
       console.log('Connection to ROS closed');
     });
 
-    // Define the map topic
     const mapTopicInstance = new ROSLIB.Topic({
       ros: rosInstance,
       name: '/map',
@@ -49,7 +46,7 @@ const useMapData = (robotId, ip_address) => {
         rosInstance.close();
       }
     };
-  }, []);
+  }, [ip_address]); 
 
   useEffect(() => {
     if (mapTopic) {
@@ -81,11 +78,11 @@ const useMapData = (robotId, ip_address) => {
 
           let color;
           if (value === -1) {
-            color = "#808080"; // Unknown
+            color = "#808080"; 
           } else if (value === 0) {
-            color = "#FFFFFF"; // Free
+            color = "#FFFFFF"; 
           } else {
-            color = "#000000"; // Occupied
+            color = "#000000"; 
           }
 
           ctx.fillStyle = color;

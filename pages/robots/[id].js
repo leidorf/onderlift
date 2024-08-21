@@ -28,6 +28,7 @@ export default function Robot({ robots, waypoints, tasks }) {
 
   const robot = {
     id: robots.robot_id,
+    ip_address: robots.ip_address,
     x_coordinate: parseFloat(odomData.position.x),
     y_coordinate: parseFloat(odomData.position.y),
     z_coordinate: parseFloat(odomData.position.z),
