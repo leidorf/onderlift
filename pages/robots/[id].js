@@ -18,7 +18,7 @@ import { addTask, assignTask, deleteTask } from "@/utils/handle-task";
 
 export default function Robot({ robots, waypoints, tasks }) {
   const router = useRouter(),
-    odomData = odomListener();
+    odomData = odomListener(robots.ip_address);
 
   const [isDeletionEnabled, setIsDeletionEnabled] = useState(false),
     [dijkstraResult, setDijkstraResult] = useState([]),
