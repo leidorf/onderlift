@@ -36,6 +36,7 @@ export default function Robot({ robots, waypoints, tasks }) {
     roll: parseFloat(odomData.orientation.roll),
     pitch: parseFloat(odomData.orientation.pitch),
   };
+  const rosUrl = `ws://${robot.ip_address}:9090`;
 
   const showShortestPath = async () => {
     setDijkstraResult(dijkstra(waypoints, robot, Number(targetWaypointId)));
@@ -79,14 +80,13 @@ export default function Robot({ robots, waypoints, tasks }) {
     }
   };
 
-  const onAssignTask = async (task_id) => {
-    await assignTask(task_id);
+  const onAssignTask = async (task_id, rosUrl) => {
+    await assignTask(task_id, rosUrl);
   };
 
   if (router.isFallback) {
     return <div>Loading...</div>;
   }
-
   return (
     <>
       <Layout>
@@ -241,7 +241,7 @@ export default function Robot({ robots, waypoints, tasks }) {
                             {task.waypoint_ids.split(",").join(" -> ")}
                             <button
                               className="btn btn-sm btn-success ms-auto"
-                              onClick={() => onAssignTask(task.task_id)}
+                              onClick={() => onAssignTask(task.task_id, rosUrl)}
                               title={`Görevi Başlat`}
                             >
                               ✔
