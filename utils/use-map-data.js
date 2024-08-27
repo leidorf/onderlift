@@ -1,10 +1,11 @@
 import { useEffect, useState, useRef } from "react";
-import { mapTopic } from "@/lib/map";
-import { addWaypoint } from "@/utils/handle-waypoint";
+import ROSLIB from "roslib"; // Make sure ROSLIB is imported
 import { useRouter } from "next/router";
 
-const useMapData = (robotId) => {
+const useMapData = (robotId, ip_address) => {
   const [mapData, setMapData] = useState(null);
+  const [ros, setRos] = useState(null);
+  const [mapTopic, setMapTopic] = useState(null);
   const canvasRef = useRef(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
@@ -12,14 +13,54 @@ const useMapData = (robotId) => {
   const router = useRouter();
 
   useEffect(() => {
-    mapTopic.subscribe((message) => {
-      setMapData(message);
+    const rosInstance = new ROSLIB.Ros({
+      url: `ws://${ip_address}:9090`, 
     });
 
+    rosInstance.on('connection', () => {
+      console.log('Connected to ROS');
+    });
+
+    rosInstance.on('error', (error) => {
+      console.error('Error connecting to ROS:', error);
+    });
+
+    rosInstance.on('close', () => {
+      console.log('Connection to ROS closed');
+    });
+
+    const mapTopicInstance = new ROSLIB.Topic({
+      ros: rosInstance,
+      name: '/map',
+      messageType: 'nav_msgs/OccupancyGrid',
+    });
+
+    setRos(rosInstance);
+    setMapTopic(mapTopicInstance);
+
     return () => {
-      mapTopic.unsubscribe();
+      if (mapTopicInstance) {
+        mapTopicInstance.unsubscribe();
+      }
+      if (rosInstance) {
+        rosInstance.close();
+      }
     };
-  }, []);
+  }, [ip_address]); 
+
+  useEffect(() => {
+    if (mapTopic) {
+      const handleMapMessage = (message) => {
+        setMapData(message);
+      };
+
+      mapTopic.subscribe(handleMapMessage);
+
+      return () => {
+        mapTopic.unsubscribe(handleMapMessage);
+      };
+    }
+  }, [mapTopic]);
 
   useEffect(() => {
     if (mapData && canvasRef.current) {
@@ -37,11 +78,11 @@ const useMapData = (robotId) => {
 
           let color;
           if (value === -1) {
-            color = "#808080"; // Unknown
+            color = "#808080"; 
           } else if (value === 0) {
-            color = "#FFFFFF"; // Free
+            color = "#FFFFFF"; 
           } else {
-            color = "#000000"; // Occupied
+            color = "#000000"; 
           }
 
           ctx.fillStyle = color;
@@ -70,7 +111,7 @@ const useMapData = (robotId) => {
   const handleImageClick = async () => {
     if (isAddingWaypoint) {
       const { x, y } = mousePosition;
-      await addWaypoint(robotId, (Number(x)), (Number(y)), 0);
+      await addWaypoint(robotId, Number(x), Number(y), 0);
       setIsAddingWaypoint(!isAddingWaypoint);
       router.replace(router.asPath);
     }

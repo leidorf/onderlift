@@ -28,14 +28,14 @@ export const deleteAllTasks = async (tasks) => {
   }
 };
 
-export const assignTask = async (task_id) => {
+export const assignTask = async (task_id, rosUrl) => {
   try {
     const response = await fetch("/api/assign-task", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ task_id }),
+      body: JSON.stringify({ task_id, rosUrl }),
     });
 
     if (response.ok) {
@@ -49,4 +49,3 @@ export const assignTask = async (task_id) => {
     alert("Görev gönderilemedi.");
   }
 };
-

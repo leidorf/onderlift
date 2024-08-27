@@ -20,7 +20,7 @@ export default function HomePage({ robots }) {
                       <h5 className="link-black">
                         <Link href={`/robots/${robot.robot_id}`}>Robot ID: {robot.robot_id}</Link>
                       </h5>
-                      <RosConnection />
+                      <RosConnection ipAddress={robot.ip_address} />
                       IP Adresi: {robot.ip_address}
                       <br />
                       <p>Oluşturulma Tarihi: {new Date(robot.created_at).toLocaleString("tr-TR")}</p>

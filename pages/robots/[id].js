@@ -18,7 +18,7 @@ import { addTask, assignTask, deleteTask } from "@/utils/handle-task";
 
 export default function Robot({ robots, waypoints, tasks }) {
   const router = useRouter(),
-    odomData = odomListener();
+    odomData = odomListener(robots.ip_address);
 
   const [isDeletionEnabled, setIsDeletionEnabled] = useState(false),
     [dijkstraResult, setDijkstraResult] = useState([]),
@@ -28,6 +28,7 @@ export default function Robot({ robots, waypoints, tasks }) {
 
   const robot = {
     id: robots.robot_id,
+    ip_address: robots.ip_address,
     x_coordinate: parseFloat(odomData.position.x),
     y_coordinate: parseFloat(odomData.position.y),
     z_coordinate: parseFloat(odomData.position.z),
@@ -35,6 +36,7 @@ export default function Robot({ robots, waypoints, tasks }) {
     roll: parseFloat(odomData.orientation.roll),
     pitch: parseFloat(odomData.orientation.pitch),
   };
+  const rosUrl = `ws://${robot.ip_address}:9090`;
 
   const showShortestPath = async () => {
     setDijkstraResult(dijkstra(waypoints, robot, Number(targetWaypointId)));
@@ -78,14 +80,13 @@ export default function Robot({ robots, waypoints, tasks }) {
     }
   };
 
-  const onAssignTask = async (task_id) => {
-    await assignTask(task_id);
+  const onAssignTask = async (task_id, rosUrl) => {
+    await assignTask(task_id, rosUrl);
   };
 
   if (router.isFallback) {
     return <div>Loading...</div>;
   }
-
   return (
     <>
       <Layout>
@@ -96,7 +97,7 @@ export default function Robot({ robots, waypoints, tasks }) {
               <h4>
                 Robot ID: {robots.robot_id} ({robots.ip_address})
               </h4>
-              <RosConnection />
+              <RosConnection ipAddress={robots.ip_address} />
               <p>Robot Kayıt Tarihi: {new Date(robots.created_at).toLocaleString("tr-TR")}</p>
               <hr />
             </div>
@@ -240,7 +241,7 @@ export default function Robot({ robots, waypoints, tasks }) {
                             {task.waypoint_ids.split(",").join(" -> ")}
                             <button
                               className="btn btn-sm btn-success ms-auto"
-                              onClick={() => onAssignTask(task.task_id)}
+                              onClick={() => onAssignTask(task.task_id, rosUrl)}
                               title={`Görevi Başlat`}
                             >
                               ✔

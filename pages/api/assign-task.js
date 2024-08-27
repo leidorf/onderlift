@@ -1,12 +1,11 @@
 import pool from "@/server/db";
-import ros from "@/lib/ros";
 import ROSLIB from "roslib";
 import rateLimit from "express-rate-limit";
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
-  message: "Cok fazla istek gonderildi, lutfen bir sure sonra tekrar deneyiniz.",
+  message: "Çok fazla istek gönderildi, lütfen bir süre sonra tekrar deneyiniz.",
 });
 
 export default async function handler(req, res) {
@@ -18,9 +17,27 @@ export default async function handler(req, res) {
     return res.status(405).end();
   }
 
-  const { task_id } = req.body;
+  const { task_id, rosUrl } = req.body;
 
   try {
+    // Create a new ROS connection dynamically based on the received URL
+    const ros = new ROSLIB.Ros({
+      url: rosUrl,
+    });
+
+    ros.on("connection", () => {
+      console.log("Connected to ROS.");
+    });
+
+    ros.on("error", (error) => {
+      console.error("Error connecting to ROS:", error);
+      res.status(500).json({ error: "Failed to connect to ROS" });
+    });
+
+    ros.on("close", () => {
+      console.log("Connection to ROS closed.");
+    });
+
     const [taskRows] = await pool.execute("SELECT waypoint_ids FROM tasks WHERE task_id = ?", [task_id]);
     if (taskRows.length === 0) {
       return res.status(404).json({ error: "Task not found" });

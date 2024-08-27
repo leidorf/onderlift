@@ -2712,6 +2712,11 @@ negotiator@0.6.3:
   resolved "https://registry.npmjs.org/negotiator/-/negotiator-0.6.3.tgz"
   integrity sha512-+EUsqGPLsM+j/zdChZjsnX51g4XrHFOIXwfnCVPGlQk/k5giakcKsuxCObBRu6DSm9opw/O6slWbJdghQM4bBg==
 
+net@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/net/-/net-1.0.2.tgz#d1757ec9a7fb2371d83cf4755ce3e27e10829388"
+  integrity sha512-kbhcj2SVVR4caaVnGLJKmlk2+f+oLkjqdKeQlmUtz6nGzOpbcobwVIeSURNgraV/v3tlmGIX82OcPCl0K6RbHQ==
+
 next-swagger-doc@^0.4.0:
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/next-swagger-doc/-/next-swagger-doc-0.4.0.tgz#1a727b663ab68a0630b3bffd96244533190aa08d"
@@ -3515,7 +3520,7 @@ reusify@^1.0.4:
 
 roslib@^1.4.1:
   version "1.4.1"
-  resolved "https://registry.npmjs.org/roslib/-/roslib-1.4.1.tgz"
+  resolved "https://registry.yarnpkg.com/roslib/-/roslib-1.4.1.tgz#ddf7c61e60d8e563d46ba8e2ea9ad90f9a1e5aa3"
   integrity sha512-l3BOHqG99RHb73XROykj8o2rRaUqqYwN0E6C1EkH+R1GIfDjMaUGPaCNEoKKmsXT0Vu0EOyL1BudQtdVlMsgjA==
   dependencies:
     "@xmldom/xmldom" "^0.8.0"
@@ -3992,6 +3997,11 @@ through@^2.3.6:
   version "2.3.8"
   resolved "https://registry.yarnpkg.com/through/-/through-2.3.8.tgz#0dd4c9ffaabc357960b1b724115d7e0e86a2e1f5"
   integrity sha512-w89qg7PI8wAdvX60bMDP+bFoD5Dvhm9oLheFp5O4a2QF0cSBGsBX4qZmadPMvVqlLJBBci+WqGGOAPvcDeNSVg==
+
+tls@^0.0.1:
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/tls/-/tls-0.0.1.tgz#0ab2bf5968d71df2f8c0e1515d24a2240b98aac8"
+  integrity sha512-GzHpG+hwupY8VMR6rYsnAhTHqT/97zT45PG8WD5eTT1lq+dFE0nN+1PYpsoBcHJgSmTz5ceK2Cv88IkPmIPOtQ==
 
 tmp@^0.0.33:
   version "0.0.33"
